@@ -1,0 +1,8 @@
+node_modules
+uploads
+.env
+.env.bak
+pdf
+scripts
+package-lock.json
+public

@@ -1,0 +1,69 @@
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="circle-image" [matTooltip]="userEmail!"></div>
+        <h2 class="app-title">NUS ISS GPT</h2>
+        <button type="button" mat-button matTooltip="Upload PDF" class="pdffileupload-button" [ngStyle]="screenAvailWidth | alignSendButton" color="primary" 
+            (click)="pdfUpload.click()" [disabled]="messageSent">
+            <mat-icon class="file-icon">description</mat-icon>
+        </button>
+        <input hidden type="file" class="file-input" accept="application/pdf" (change)="onPDFFileSelected($event)" #pdfUpload>
+        <button mat-button color="primary" matTooltip="Send message" class="pdfsend-button" type="button" (click)="talktoPDF()" [ngStyle]="screenAvailWidth | alignUploadButton">
+            <mat-icon class="file-icon">send</mat-icon>
+        </button>
+        <button mat-button color="primary" matTooltip="Generate Music" class="musicsend-button" type="button" (click)="generateSong()" [ngStyle]="screenAvailWidth | alignSendMusicButton">
+            <mat-icon class="file-icon">music_note</mat-icon>
+        </button>
+        <button mat-button color="primary" matTooltip="Logout" class="logout-button" type="button" (click)="logout()" [ngStyle]="screenAvailWidth | alignLogoutButton">
+            <mat-icon class="file-icon">logout</mat-icon>
+        </button>
+    </div>
+    
+    <div class="center">
+        <mat-spinner *ngIf="messageSent"></mat-spinner>
+    </div>
+
+    <div #userMessages class="scrollable-y">
+        <div  class="chat-messages" *ngFor="let message of messages">
+            <span>{{ message.sender }}</span>
+                <div *ngIf="message.type==='msg'" class="ollama-wrap" matTooltip="{{ message.text }}" [innerHtml]=message.text></div>
+                <br>
+                <img *ngIf="message.type==='img'" [src]="message.text" width="200" height="200">
+                <br>
+                <a *ngIf="message.type==='pdf'" [href]="pdfUrl" >"{{ message.text }}"</a>
+                <br>
+                <audio *ngIf="message.type==='audio'" controls src="{{ message.text }}"></audio>
+        </div>
+        <div class="prompt-box-container">
+            <div class="prompt-box">        
+                <ul *ngFor="let promptItem of (promptItemLists$ | async) let i = index;" >
+                    <li *ngIf="i < 10"><a (click)="populatePromptMsg()">{{promptItem.prompt}}</a></li>
+                </ul>
+                <button mat-button color="primary" matTooltip="clear history"  type="button" (click)="clearHistory()">
+                    Clear history
+                </button>
+            </div>
+            <br>
+          </div>
+        <div >
+    
+    <div class="chat-input">
+        <form [formGroup]="messageForm" #formDirective="ngForm" id="messageForm" (ngSubmit)="sendMessage(formDirective)">
+            <mat-form-field class="example-full-width" appearance="fill">
+                <input matInput id="messageInput" formControlName="text" autocomplete="off" placeholder="Type a message here..">
+                <mat-error *ngIf="messageForm?.get('text')?.invalid">Message is required</mat-error>
+            </mat-form-field>
+            <div class="buttons-grid">
+                <button mat-button color="primary" matTooltip="Send message" class="send-button" type="submit" [disabled]="messageSent">
+                    <mat-icon>send</mat-icon>
+                </button>
+                <button type="button" mat-button matTooltip="Upload image" class="fileupload-button" color="primary" 
+                    (click)="fileUpload.click()" [disabled]="messageSent">
+                    <mat-icon>file_copy</mat-icon>
+                </button>
+                <input hidden type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload>
+            </div>
+            
+        </form>
+    </div>
+
+</div>

@@ -1,0 +1,249 @@
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Message } from '../model/message';
+import { FormBuilder, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
+import { OllamaService } from '../services/ollama.service';
+import { markdownToHtml } from '../markdown-renderer/transform-markdown';
+import { SunoApiService } from '../services/suno.api.service';
+import Corbado from '@corbado/web-js';
+import { SessionUser } from "@corbado/types";
+import { Router } from '@angular/router';
+import { db, PromptItem } from '../shared/prompt-db';
+import { liveQuery } from 'dexie';
+
+@Component({
+  selector: 'app-chat',
+  templateUrl: './chat.component.html',
+  styleUrls: ['./chat.component.css']
+})
+export class ChatComponent implements OnInit, OnDestroy{
+  messages: Message[] = [];
+  messageForm: FormGroup;
+  messageSent : boolean = false;
+  fileName:string = '';
+  responseMessage:string = "";
+  pdfUrl: string = "";
+  screenAvailWidth: number = 0;
+  user: SessionUser | undefined = undefined
+  userEmail?: string = "";
+  chatOwnerUsername: string = "NUS ISS GPT";
+  promptItemLists$:any;
+
+  @ViewChild('userMessages')
+  private inputMessageRef?: ElementRef;
+
+  constructor(private fb: FormBuilder, 
+        private ollamaService: OllamaService, private cdRef: ChangeDetectorRef,
+        private sunoSvc: SunoApiService, private router:Router) { 
+    this.messageForm = this.fb.group({
+      text: ['', [Validators.required, Validators.minLength(3)]],
+    });    
+  }
+
+  async addPromptMessagetoDexie(promptMsg:string) {
+    await db.addPromptItem({
+      email: this.user?.orig,
+      prompt: promptMsg,
+      postedDate: new Date()
+    });
+  }
+
+  ngOnDestroy(): void {
+      // clean up resources
+  }
+
+  populatePromptMsg(){
+    console.log("populate prompt msg");
+  }
+
+  async clearHistory(){
+    await db.promptItems.clear();
+  }
+
+  // ngAfterViewChecked() {  
+  //   console.log(this.userEmail!)
+  //   this.promptItemLists$ = liveQuery(() => db.promptItems
+  //     .where('email').equals(this.userEmail!).toArray());
+  // }
+
+  async ngOnInit() {
+    console.log(screen.availWidth);
+    this.screenAvailWidth = screen.availWidth;
+    if(screen.availWidth < 1090){
+      console.log("In Potrait mode");
+    }else{
+      console.log("In Landscape mode");
+    }
+    // Load and initialize Corbado SDK when component mounts
+    await Corbado.load({
+        projectId: "pro-0317338422706138772",
+        darkMode: 'off',
+    });
+    // Get the user data from the Corbado SDK
+    this.user = Corbado.user
+    console.log(this.user?.name);
+    console.log(this.user?.orig);
+    this.userEmail = this.user?.orig;
+    this.promptItemLists$ = liveQuery(() => db.promptItems
+      .where('email').equals(this.userEmail!)
+      .toArray());
+    if(!Corbado.isAuthenticated){
+      this.router.navigate([''])
+    }
+  } 
+
+  onFileSelected(event: any) {
+    this.messageSent = true;
+    let imageUrl: string = "";
+    const file:File = event.target?.files[0];
+    const input = event.target as HTMLInputElement;
+    if (file) {
+        this.fileName = file.name;
+        const formData = new FormData();
+        formData.append("file", file);
+        var reader = new FileReader();
+        reader.onload = (event:any) => {
+            imageUrl = event.target.result;
+            console.log(imageUrl);
+            this.messages.push({text: imageUrl, sender: this.userEmail!, 
+                timestamp: new Date(), type:'img'});
+        }
+        reader.readAsDataURL(event.target.files[0]);
+        this.ollamaService.uploadFile(formData).then(async (response)  => {
+          if(response.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/gm)){
+            console.log("contains dot n number !");
+          }
+          this.responseMessage = await markdownToHtml(response);
+          this.messages.push({text: this.responseMessage, 
+              sender: this.chatOwnerUsername, timestamp: new Date(), type:'msg'});
+          this.messageSent = false;
+          input.value="";
+        });  
+    }
+  }
+
+  b64toBlob(b64Data:any, contentType=''){
+    const byteCharacters = atob(b64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArrays = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArrays], {type: contentType});
+    return blob;
+  }
+
+  onPDFFileSelected(event: any) {
+    console.log("dddd");
+    this.messageSent = true;
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const pdfFile = input.files[0];
+      if (pdfFile) {
+          this.fileName = pdfFile.name;
+          const formData = new FormData();
+          formData.append("pdf-file", pdfFile);
+          var reader = new FileReader();
+          reader.onload = (event:any) => {
+              let pdfBase64 = event.target.result;
+              pdfBase64.replace(/^[^,]+,/, '');
+              const base64Data = pdfBase64.split(',')[1];
+              console.log(base64Data);
+              var fileblob = this.b64toBlob(base64Data, 'application/pdf');
+              this.pdfUrl = window.URL.createObjectURL(fileblob); 
+              console.log(this.pdfUrl);
+              this.messages.push({text: this.fileName, 
+                  sender: this.userEmail!, timestamp: new Date(), type:'pdf'});
+          }
+          reader.readAsDataURL(event.target.files[0]);
+          this.ollamaService.uploadPDFFile(formData).then(async (response)  => {
+            if(response.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/gm)){
+              console.log("contains dot n number !");
+            }
+            console.log(response);
+            this.messages.push({text: response, 
+                sender: this.chatOwnerUsername, timestamp: new Date(), type:'msg'});
+            this.messageSent = false;
+            input.value = '';
+          });  
+      }
+    }
+  }
+
+  sendMessage(formDirective: FormGroupDirective) {
+    console.log("Sending...");
+    if(this.messageForm.valid){
+      const text = this.messageForm.value.text;
+      console.log('User: ' + text);
+      this.messages.push({text: text, sender: this.userEmail!, 
+                timestamp: new Date(), type:'msg'});
+      this.addPromptMessagetoDexie(text);
+      this.messageSent = true;
+      this.ollamaService.chatwithOllama(text).then(async (response) => {
+        this.responseMessage = await markdownToHtml(response);
+        this.messages.push({text: this.responseMessage, 
+            sender: this.chatOwnerUsername, timestamp: new Date(), type:'msg'});
+        this.messageSent = false;
+      });
+
+      this.messageForm.reset();
+      formDirective.resetForm();
+      this.scrollToBottom();
+    }
+  }
+
+  talktoPDF(){
+    console.log("Sending...");
+    if(this.messageForm.valid){
+      const text = this.messageForm.value.text;
+      console.log('User: ' + text);
+      this.messages.push({text: text, sender: this.userEmail!, 
+              timestamp: new Date(), type:'msg'});
+      this.addPromptMessagetoDexie(text);
+      this.messageSent = true;
+      this.ollamaService.chatwithOllamaPDF(text).then(async (response) => {
+        console.log(response);
+        this.responseMessage = await markdownToHtml(response);
+        this.messages.push({text: this.responseMessage, 
+              sender: this.chatOwnerUsername, timestamp: new Date(), type:'msg'});
+        this.messageSent = false;
+      });
+
+      this.messageForm.reset();
+      this.scrollToBottom();
+    }
+  }
+
+  generateSong(): void {
+    if(this.messageForm.valid){
+      const text = this.messageForm.value.text;
+      console.log('User: ' + text);
+      this.messages.push({text: text, sender: this.userEmail!, 
+              timestamp: new Date(), type:'msg'});
+      this.messageSent = true;
+      this.sunoSvc.generateSongFromSuno(text).then(async (response) => {
+        console.log(response[0]?.audio_url);
+        console.log(response[0]?.status);
+        if(response[0]?.status === 'streaming'){
+          this.messages.push({text: response[0]?.audio_url, 
+                  sender: this.chatOwnerUsername, timestamp: new Date(), type:'audio'});
+          this.messageSent = false;
+        }
+      });
+      this.messageForm.reset();
+    }
+  }
+
+  scrollToBottom(): void {
+    try {
+      this.cdRef.detectChanges();
+      this.inputMessageRef!.nativeElement.scrollTop = this.inputMessageRef?.nativeElement.scrollHeight;
+    } catch(err) { }                 
+  }
+
+  async logout(){
+    if (Corbado.isAuthenticated) {
+      Corbado.logout();
+      this.router.navigate(['']);
+    }
+  }
+}

@@ -19,6 +19,6 @@ app.use(express.static('public'))
 
 app.use('/api', chatRouter);
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0',() => {
   console.log(`Ollama API Server listening on port ${port}`)
 })

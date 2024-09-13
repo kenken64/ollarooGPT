@@ -65,6 +65,9 @@ export const chatOllama =  async (req, res) => {
         console.log('message: ' + req.query.message)
         console.log(process.env.OLLAMA_BASE_URL)
         let msg = req.query.message
+        if(msg.length > 4096){
+          res.status(500).json({ error: 'Prompt message exceed 4096' });
+        }
         const response = await ollama.chat({
             model: process.env.OLLAMA_MODEL, // Default value
             baseUrl: process.env.OLLAMA_BASE_URL, // Default value
@@ -84,6 +87,9 @@ export const chatWithPDF =  async (req, res) => {
     let responseResult = '';
     console.log('message: ' + req.query.message)
     let question = req.query.message;
+    if(question.length > 4096){
+      res.status(500).json({ error: 'Prompt message exceed 4096' });
+    }
     const queryEmbedding = await new OllamaEmbeddings(
       {
         model: process.env.OLLAMA_MODEL, // Default value
@@ -191,6 +197,9 @@ export const uploadGenAIPDF =  async (req, res) => {
 export const generateAISong = async(req,res) =>{
     let sunoApiUrl = process.env.SUNO_API_URL;
     let question = req.query.message;
+    if(question.length > 4096){
+      res.status(500).json({ error: 'Prompt message exceed 4096' });
+    }
     console.log(question);
     console.log(sunoApiUrl);
     const body = {

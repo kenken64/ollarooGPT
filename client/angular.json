@@ -16,7 +16,8 @@
             "allowedCommonJsDependencies": [
                 "react-dom/client",
                 "void-elements",
-                "lodash"
+                "lodash",
+		"react"
             ],
             "outputPath": {
               "base": "dist/client"

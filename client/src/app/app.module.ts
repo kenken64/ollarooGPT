@@ -15,7 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -26,36 +26,29 @@ import { AlignLogoutButtonPipe } from './shared/alignlogout.btn.pipe';
 import { LoginComponent } from './security/login/login.component';
 import { OrderByPipe } from './shared/orderby.pipe';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    ChatComponent,
-    LoginComponent,
-    AlignSendButtonPipe,
-    AlignUploadButtonPipe,
-    AlignSendMusicButtonPipe,
-    AlignLogoutButtonPipe,
-    OrderByPipe,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatSidenavModule,
-    MatListModule,
-    MatButtonModule,
-    HttpClientModule,
-    MatCardModule,
-    MatGridListModule,
-    FormsModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        ChatComponent,
+        LoginComponent,
+        AlignSendButtonPipe,
+        AlignUploadButtonPipe,
+        AlignSendMusicButtonPipe,
+        AlignLogoutButtonPipe,
+        OrderByPipe,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatSidenavModule,
+        MatListModule,
+        MatButtonModule,
+        MatCardModule,
+        MatGridListModule,
+        FormsModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }

@@ -1,0 +1,16 @@
+<mat-nav-list>
+    <a href="#" mat-list-item (click)="bottomSheetCommand($event, 'SM')">
+      <span matListItemTitle>Send Message</span>
+      <span matLine>Ask Ollama's LLM Model</span>
+    </a>
+  
+    <a href="#" mat-list-item (click)="bottomSheetCommand($event, 'APDF')">
+      <span matListItemTitle>Ask the document</span>
+      <span matLine>Ask Embbeded PDF along with LLM</span>
+    </a>
+  
+    <a href="#" mat-list-item (click)="bottomSheetCommand($event, 'GS')">
+      <span matListItemTitle>Generate a Song</span>
+      <span matLine>Generate an AI song from LLM</span>
+    </a>
+</mat-nav-list>

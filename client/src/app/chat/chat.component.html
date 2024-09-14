@@ -33,7 +33,7 @@
                 <br>
                 <audio *ngIf="message.type==='audio'" controls src="{{ message.text }}"></audio>
         </div>
-        <div class="prompt-box-container">
+        <div *ngIf="!isMobileView" (window:resize)="onResize($event)" class="prompt-box-container">
             <div class="prompt-box">        
                 <ul *ngFor="let promptItem of (promptItemLists$ | async) let i = index;" >
                     <li *ngIf="i < 10"><a (click)="populatePromptMsg()">{{promptItem.prompt}}</a></li>
@@ -47,13 +47,13 @@
         <div >
     
     <div class="chat-input">
-        <form [formGroup]="messageForm" #formDirective="ngForm" id="messageForm" (ngSubmit)="sendMessage(formDirective)">
+        <form [formGroup]="messageForm" #formDirective="ngForm" id="messageForm">
             <mat-form-field class="example-full-width" appearance="fill">
                 <input matInput id="messageInput" formControlName="text" autocomplete="off" placeholder="Type a message here..">
                 <mat-error *ngIf="messageForm?.get('text')?.invalid">Message is required</mat-error>
             </mat-form-field>
             <div class="buttons-grid">
-                <button mat-button color="primary" matTooltip="Send message" class="send-button" type="submit" [disabled]="messageSent">
+                <button mat-button color="primary" matTooltip="Send message" class="send-button" (click)="openSendMsgBottomSheet()">
                     <mat-icon>send</mat-icon>
                 </button>
                 <button type="button" mat-button matTooltip="Upload image" class="fileupload-button" color="primary" 
@@ -61,8 +61,7 @@
                     <mat-icon>file_copy</mat-icon>
                 </button>
                 <input hidden type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload>
-            </div>
-            
+            </div>       
         </form>
     </div>
 

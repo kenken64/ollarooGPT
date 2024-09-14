@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ChatComponent } from './chat/chat.component';
+import { BottomSheetOverviewSendMsgSheet, ChatComponent } from './chat/chat.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 
@@ -25,11 +25,13 @@ import { AlignSendMusicButtonPipe } from './shared/alignsendMusic.btn.pipe';
 import { AlignLogoutButtonPipe } from './shared/alignlogout.btn.pipe';
 import { LoginComponent } from './security/login/login.component';
 import { OrderByPipe } from './shared/orderby.pipe';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 
 @NgModule({ declarations: [
         AppComponent,
         ChatComponent,
         LoginComponent,
+        BottomSheetOverviewSendMsgSheet,
         AlignSendButtonPipe,
         AlignUploadButtonPipe,
         AlignSendMusicButtonPipe,
@@ -50,5 +52,6 @@ import { OrderByPipe } from './shared/orderby.pipe';
         FormsModule,
         MatIconModule,
         MatProgressSpinnerModule,
+        MatBottomSheetModule,
         MatTooltipModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }

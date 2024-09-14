@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
 import { Message } from '../model/message';
 import { FormBuilder, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { OllamaService } from '../services/ollama.service';
@@ -9,11 +9,16 @@ import { SessionUser } from "@corbado/types";
 import { Router } from '@angular/router';
 import { db, PromptItem } from '../shared/prompt-db';
 import { liveQuery } from 'dexie';
+import { DeviceDetectorService } from 'ngx-device-detector';
+import {
+  MatBottomSheet,
+  MatBottomSheetRef,
+} from '@angular/material/bottom-sheet';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css']
+  styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent implements OnInit, OnDestroy{
   messages: Message[] = [];
@@ -27,13 +32,20 @@ export class ChatComponent implements OnInit, OnDestroy{
   userEmail?: string = "";
   chatOwnerUsername: string = "NUS ISS GPT";
   promptItemLists$:any;
+  isMobileView?: boolean;
+  private _bottomSheet = inject(MatBottomSheet);
 
   @ViewChild('userMessages')
   private inputMessageRef?: ElementRef;
 
+  @ViewChild('formDirective') 
+  private chatFormEle?: FormGroupDirective;
+
   constructor(private fb: FormBuilder, 
         private ollamaService: OllamaService, private cdRef: ChangeDetectorRef,
-        private sunoSvc: SunoApiService, private router:Router) { 
+        private sunoSvc: SunoApiService, private router:Router,
+        private deviceService: DeviceDetectorService,
+        private cdr: ChangeDetectorRef) { 
     this.messageForm = this.fb.group({
       text: ['', [Validators.required, Validators.minLength(3)]],
     });    
@@ -51,6 +63,22 @@ export class ChatComponent implements OnInit, OnDestroy{
       // clean up resources
   }
 
+  openSendMsgBottomSheet(): void {
+    console.log("open bottom sheet");
+    const bottomSheetRef = this._bottomSheet.open(BottomSheetOverviewSendMsgSheet);
+    bottomSheetRef.afterDismissed().subscribe((result) => {
+      if (result) {
+        if(result === 'SM'){
+          this.sendMessage();
+        }else if(result === 'APDF'){
+          this.talktoPDF();
+        }else if(result === "GS"){
+          this.generateSong();
+        }
+      }
+    });
+  }
+
   populatePromptMsg(){
     console.log("populate prompt msg");
   }
@@ -59,20 +87,18 @@ export class ChatComponent implements OnInit, OnDestroy{
     await db.promptItems.clear();
   }
 
-  // ngAfterViewChecked() {  
-  //   console.log(this.userEmail!)
-  //   this.promptItemLists$ = liveQuery(() => db.promptItems
-  //     .where('email').equals(this.userEmail!).toArray());
-  // }
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    console.log(event.target.innerWidth);
+    
+    if(innerWidth< 430){
+      console.log("change mobile view")
+      this.isMobileView = this.deviceService.isMobile();
+    }
+    this.cdr.detectChanges();
+  }
 
   async ngOnInit() {
-    console.log(screen.availWidth);
-    this.screenAvailWidth = screen.availWidth;
-    if(screen.availWidth < 1090){
-      console.log("In Potrait mode");
-    }else{
-      console.log("In Landscape mode");
-    }
     // Load and initialize Corbado SDK when component mounts
     await Corbado.load({
         projectId: "pro-0317338422706138772",
@@ -169,7 +195,7 @@ export class ChatComponent implements OnInit, OnDestroy{
     }
   }
 
-  sendMessage(formDirective: FormGroupDirective) {
+  sendMessage() {
     console.log("Sending...");
     if(this.messageForm.valid){
       const text = this.messageForm.value.text;
@@ -186,7 +212,7 @@ export class ChatComponent implements OnInit, OnDestroy{
       });
 
       this.messageForm.reset();
-      formDirective.resetForm();
+      this.chatFormEle?.resetForm();
       this.scrollToBottom();
     }
   }
@@ -245,5 +271,22 @@ export class ChatComponent implements OnInit, OnDestroy{
       Corbado.logout();
       this.router.navigate(['']);
     }
+  }
+}
+
+@Component({
+  selector: 'chat-bottom-sheet',
+  templateUrl: 'bottom-sheet-send-msg-sheet.html'
+})
+export class BottomSheetOverviewSendMsgSheet {
+  
+  private _bottomSheetRef =
+    inject<MatBottomSheetRef<BottomSheetOverviewSendMsgSheet>>(MatBottomSheetRef);
+
+  bottomSheetCommand(event: MouseEvent, command: string): void {
+    console.log("emit mesg")
+    
+    this._bottomSheetRef.dismiss(command);
+    event.preventDefault();
   }
 }

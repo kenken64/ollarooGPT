@@ -24,7 +24,7 @@ const pc = new Pinecone({
 try{
   await pc.createIndex({
     name: process.env.PINECONE_INDEX_NAME,
-    dimension: 4096, // Replace with your model dimensions
+    dimension: 5120, // Replace with your model dimensions
     metric: 'euclidean', // Replace with your model metric
     spec: { 
         serverless: { 
@@ -35,6 +35,7 @@ try{
   });
 }catch(e){
   console.log('Error creating index!');
+  console.log("Assigned existing index")
   var index = pc.Index(process.env.PINECONE_INDEX_NAME)
 }
 
@@ -179,13 +180,21 @@ export const uploadGenAIPDF =  async (req, res) => {
             };
             console.log("pushing...")
             console.log(vector)
-            batches.push(vector);
+            const x =normalizeVector(vector, 5120)
+            console.log(x)
+            batches.push(x);
+            console.log("VLVL>>>>>" + embeddingsArrays.length);
             // When batch is full or it's the last item, upsert the vectors
             console.log(batches.length)
             console.log(chunk.length)
           }
           console.log("...upsert !");
-          await index?.upsert(batches);
+          try{
+            await index?.upsert(batches);
+          }catch(error){
+            console.log("error !!!!")
+            console.log(error)
+          }
           // Empty the batch
           batches = [];
       }
@@ -193,6 +202,22 @@ export const uploadGenAIPDF =  async (req, res) => {
    
     res.status(200).json("I have reviewed the PDF you uploaded and am now familiar with its contents. Feel free to ask me anything related to the document.");
 };
+
+function normalizeVector(vector, targetDimension) {
+  const vectorLength = vector.length;
+
+  if (vectorLength > targetDimension) {
+    // Truncate if too long
+    return vector.slice(0, targetDimension);
+  } else if (vectorLength < targetDimension) {
+    // Pad with zeros if too short
+    const padding = Array(targetDimension - vectorLength).fill(0);
+    return vector.concat(padding);
+  } else {
+    // If already the correct dimension, return as is
+    return vector;
+  }
+}
 
 export const generateAISong = async(req,res) =>{
     let sunoApiUrl = process.env.SUNO_API_URL;

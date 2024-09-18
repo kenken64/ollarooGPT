@@ -1,18 +1,18 @@
 <div class="chat-container">
     <div class="chat-header">
         <div class="circle-image" [matTooltip]="userEmail!"></div>
-        <h2 class="app-title">NUS ISS GPT</h2>
-        <button type="button" mat-button matTooltip="Upload PDF" class="pdffileupload-button" [ngStyle]="screenAvailWidth | alignSendButton" color="primary" 
+        <h1 class="app-title">NUS ChatGPT</h1>
+        <button type="button" mat-button matTooltip="Upload PDF" class="pdffileupload-button" [ngStyle]="screenAvailWidth | alignUploadButton" color="primary" 
             (click)="pdfUpload.click()" [disabled]="messageSent">
             <mat-icon class="file-icon">description</mat-icon>
         </button>
         <input hidden type="file" class="file-input" accept="application/pdf" (change)="onPDFFileSelected($event)" #pdfUpload>
-        <button mat-button color="primary" matTooltip="Send message" class="pdfsend-button" type="button" (click)="talktoPDF()" [ngStyle]="screenAvailWidth | alignUploadButton">
+        <!-- <button mat-button color="primary" matTooltip="Send message" class="pdfsend-button" type="button" (click)="talktoPDF()" [ngStyle]="screenAvailWidth | alignUploadButton">
             <mat-icon class="file-icon">send</mat-icon>
         </button>
         <button mat-button color="primary" matTooltip="Generate Music" class="musicsend-button" type="button" (click)="generateSong()" [ngStyle]="screenAvailWidth | alignSendMusicButton">
             <mat-icon class="file-icon">music_note</mat-icon>
-        </button>
+        </button> -->
         <button mat-button color="primary" matTooltip="Logout" class="logout-button" type="button" (click)="logout()" [ngStyle]="screenAvailWidth | alignLogoutButton">
             <mat-icon class="file-icon">logout</mat-icon>
         </button>

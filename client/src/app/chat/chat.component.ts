@@ -74,6 +74,10 @@ export class ChatComponent implements OnInit, OnDestroy{
           this.talktoPDF();
         }else if(result === "GS"){
           this.generateSong();
+        }else if(result === "UIM"){
+          // console.log("upload image")
+        }else if(result === 'UPPDF'){
+
         }
       }
     });

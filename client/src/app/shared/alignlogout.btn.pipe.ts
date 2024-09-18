@@ -5,6 +5,6 @@ export class AlignLogoutButtonPipe implements PipeTransform {
   transform(width: number): any {
     console.log(width);
     if(width < 1090)
-    return { right: "140px" , top: "4%"};
+    return { right: "30px" , top: "4%"};
   }
 }

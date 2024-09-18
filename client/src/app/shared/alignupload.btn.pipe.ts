@@ -5,6 +5,6 @@ export class AlignUploadButtonPipe implements PipeTransform {
   transform(width: number): any {
     console.log(width);
     if(width < 1090)
-    return { right: "60px" , top: "4%"};
+    return { right: "70px" , top: "4%"};
   }
 }

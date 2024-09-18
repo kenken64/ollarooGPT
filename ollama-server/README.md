@@ -1,3 +1,7 @@
+## bug !!!
+
+create index having crazy bug !
+
 DotEnv 
 
 ```

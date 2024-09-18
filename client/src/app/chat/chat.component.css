@@ -101,7 +101,7 @@ mat-grid-tile {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-  }
+}
   
   .send-button:hover {
     background-color: white;
@@ -127,7 +127,7 @@ mat-grid-tile {
     background: rgb(113, 40, 230);
     position: absolute;
     margin-left: auto;
-    right: 30px;
+    right: 170px;
     top: 4%;
     transform: translateY(-50%);
     padding: 5px 10px;
@@ -169,7 +169,7 @@ mat-grid-tile {
     background: rgb(113, 40, 230);
     position: absolute;
     margin-left: auto;
-    right: 170px;
+    right: 30px;
     top: 4%;
     transform: translateY(-50%);
     padding: 5px 10px;

@@ -97,14 +97,14 @@ mat-grid-tile {
     top: 40%;
     transform: translateY(-50%);
     padding: 5px 10px;
-    color: white;
+    color: transparent;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
   
   .send-button:hover {
-    background-color: white;
+    background-color: transparent;
   }
 
   .fileupload-button {
@@ -113,14 +113,14 @@ mat-grid-tile {
     top: 40%;
     transform: translateY(-50%);
     padding: 5px 10px;
-    color: white;
+    color: transparent;
     border: none;
     border-radius: 4px;
     cursor: pointer;
   }
   
   .fileupload-button:hover {
-    background-color: white;
+    background-color: transparent;
   }
 
   .pdffileupload-button {

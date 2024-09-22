@@ -34,7 +34,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   messageForm: FormGroup;
   messageSent : boolean = false;
   fileName:string = '';
-  responseMessage:string = "";
+  responseMessage:string | undefined;
   pdfUrl: string = "";
   screenAvailWidth: number = 0;
   user: SessionUser | undefined = undefined
@@ -56,7 +56,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   private chatFormEle?: FormGroupDirective;
 
   constructor(private fb: FormBuilder, 
-        private ollamaService: OllamaService, private cdRef: ChangeDetectorRef,
+        private ollamaService: OllamaService, 
         private sunoSvc: SunoApiService, private router:Router,
         private deviceService: DeviceDetectorService,
         private cdr: ChangeDetectorRef,
@@ -79,7 +79,10 @@ export class ChatComponent implements OnInit, OnDestroy{
   }
 
   donate(){
-
+    this.dialog
+      .open(DialogExpandImageDonationComponent)
+      .afterClosed()
+      .subscribe(() => console.log('Open an Image'));
   }
 
   openSendMsgBottomSheet(): void {
@@ -109,6 +112,9 @@ export class ChatComponent implements OnInit, OnDestroy{
   }
 
   nextPage() {
+    console.log(this.currentPage);
+    console.log(this.totalPages);
+    
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
       this.loadPromptItems();
@@ -214,6 +220,7 @@ export class ChatComponent implements OnInit, OnDestroy{
           if(response.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/gm)){
             console.log("contains dot n number !");
           }
+          
           this.responseMessage = await markdownToHtml(response);
           this.messages.push({text: this.responseMessage, 
               sender: this.chatOwnerUsername, timestamp: new Date(), type:'msg'});
@@ -235,7 +242,6 @@ export class ChatComponent implements OnInit, OnDestroy{
   }
 
   onPDFFileSelected(event: any) {
-    console.log("dddd");
     this.messageSent = true;
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -337,7 +343,7 @@ export class ChatComponent implements OnInit, OnDestroy{
 
   scrollToBottom(): void {
     try {
-      this.cdRef.detectChanges();
+      this.cdr.detectChanges();
       this.inputMessageRef!.nativeElement.scrollTop = this.inputMessageRef?.nativeElement.scrollHeight;
     } catch(err) { }                 
   }
@@ -383,6 +389,27 @@ export class DialogExpandImageComponent implements OnInit{
   ngOnInit(): void {
     this.imageUrl = this.data.imageUrl;
     console.log(this.imageUrl)
+  }
+
+  closeImage() {
+    this.dialogRef.close();
+  }
+}
+
+@Component({
+  selector: 'app-dialog-expand-image',
+  templateUrl: './dialog-expand-image-donate.component.html',
+  styleUrls: ['./dialog-expand-image-donate.component.css'],
+})
+export class DialogExpandImageDonationComponent implements OnInit{
+  imageUrl: string ="/assets/payme.png";
+  
+  constructor(
+    public dialogRef: MatDialogRef<DialogExpandImageComponent>
+  ) {}
+
+  ngOnInit(): void {
+    
   }
 
   closeImage() {

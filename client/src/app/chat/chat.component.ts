@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Message } from '../model/message';
 import { FormBuilder, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { OllamaService } from '../services/ollama.service';
@@ -7,13 +7,22 @@ import { SunoApiService } from '../services/suno.api.service';
 import Corbado from '@corbado/web-js';
 import { SessionUser } from "@corbado/types";
 import { Router } from '@angular/router';
-import { db, PromptItem } from '../shared/prompt-db';
+import { db } from '../shared/prompt-db';
 import { liveQuery } from 'dexie';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import {
   MatBottomSheet,
   MatBottomSheetRef,
 } from '@angular/material/bottom-sheet';
+import {
+  MatDialog,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
+
+export interface DialogData {
+  imageUrl: string;
+}
 
 @Component({
   selector: 'app-chat',
@@ -30,10 +39,15 @@ export class ChatComponent implements OnInit, OnDestroy{
   screenAvailWidth: number = 0;
   user: SessionUser | undefined = undefined
   userEmail?: string = "";
-  chatOwnerUsername: string = "NUS ISS GPT";
+  chatOwnerUsername: string = "Ollaroo";
   promptItemLists$:any;
   isMobileView?: boolean;
   private _bottomSheet = inject(MatBottomSheet);
+  pageSize = 6; // Number of items per page
+  currentPage = 1; // Current page number (1-based)
+  totalRecords = 0;
+  totalPages = 0;
+  lastPageRecords = 0;
 
   @ViewChild('userMessages')
   private inputMessageRef?: ElementRef;
@@ -45,7 +59,8 @@ export class ChatComponent implements OnInit, OnDestroy{
         private ollamaService: OllamaService, private cdRef: ChangeDetectorRef,
         private sunoSvc: SunoApiService, private router:Router,
         private deviceService: DeviceDetectorService,
-        private cdr: ChangeDetectorRef) { 
+        private cdr: ChangeDetectorRef,
+        public dialog: MatDialog) { 
     this.messageForm = this.fb.group({
       text: ['', [Validators.required, Validators.minLength(3)]],
     });    
@@ -61,6 +76,10 @@ export class ChatComponent implements OnInit, OnDestroy{
 
   ngOnDestroy(): void {
       // clean up resources
+  }
+
+  donate(){
+
   }
 
   openSendMsgBottomSheet(): void {
@@ -83,10 +102,56 @@ export class ChatComponent implements OnInit, OnDestroy{
     });
   }
 
-  populatePromptMsg(){
-    console.log("populate prompt msg");
+  populatePromptMsg(promptMsg: string){
+    console.log("populate the input text field");
+    console.log(promptMsg)
+    this.messageForm.patchValue({text:promptMsg});
   }
 
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadPromptItems();
+      this.loadTotalRecords()
+    }
+  }
+
+  openImage(imageUrl: string) {
+    this.dialog
+      .open(DialogExpandImageComponent, { data: { imageUrl } })
+      .afterClosed()
+      .subscribe(() => console.log('Open an Image'));
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadPromptItems();
+      this.loadTotalRecords();
+    }
+  }
+
+  // Load the total number of records
+  loadTotalRecords() {
+    db.promptItems
+      .where('email')
+      .equals(this.userEmail!)
+      .count()
+      .then(count => {
+        this.totalRecords = count;
+        console.log(this.totalRecords);
+        this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
+        this.calculateLastPageRecords();
+      });
+  }
+
+  // Calculate how many records are on the last page
+  calculateLastPageRecords() {
+    const remainder = this.totalRecords % this.pageSize;
+    this.lastPageRecords = remainder === 0 ? this.pageSize : remainder;
+  }
+
+  // clear records from dexie
   async clearHistory(){
     await db.promptItems.clear();
   }
@@ -113,13 +178,20 @@ export class ChatComponent implements OnInit, OnDestroy{
     console.log(this.user?.name);
     console.log(this.user?.orig);
     this.userEmail = this.user?.orig;
-    this.promptItemLists$ = liveQuery(() => db.promptItems
-      .where('email').equals(this.userEmail!)
-      .toArray());
+    this.loadTotalRecords();
+    this.loadPromptItems();
     if(!Corbado.isAuthenticated){
       this.router.navigate([''])
     }
   } 
+
+  loadPromptItems(){
+    this.promptItemLists$ = liveQuery(() => db.promptItems
+      .where('email').equals(this.userEmail!)
+      .offset((this.currentPage - 1) * this.pageSize) // Skip items for previous pages
+      .limit(this.pageSize) // Limit the number of items to the page size
+      .reverse().toArray());
+  }
 
   onFileSelected(event: any) {
     this.messageSent = true;
@@ -294,3 +366,27 @@ export class BottomSheetOverviewSendMsgSheet {
     event.preventDefault();
   }
 }
+
+@Component({
+  selector: 'app-dialog-expand-image',
+  templateUrl: './dialog-expand-image.component.html',
+  styleUrls: ['./dialog-expand-image.component.css'],
+})
+export class DialogExpandImageComponent implements OnInit{
+  imageUrl: string | undefined;
+  
+  constructor(
+    public dialogRef: MatDialogRef<DialogExpandImageComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData
+  ) {}
+
+  ngOnInit(): void {
+    this.imageUrl = this.data.imageUrl;
+    console.log(this.imageUrl)
+  }
+
+  closeImage() {
+    this.dialogRef.close();
+  }
+}
+

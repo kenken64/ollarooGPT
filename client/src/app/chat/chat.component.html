@@ -39,7 +39,7 @@
                     <li *ngIf="i < 6" matTooltip="{{ promptItem.prompt }}"><a (click)="populatePromptMsg(promptItem.prompt)">{{promptItem.prompt | slice:0:50}}...</a></li>
                 </ul>
                 <button mat-button color="primary" (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
-                <button mat-button color="primary" (click)="nextPage()" [disabled]="currentPage-1 === totalPages">Next</button>
+                <button mat-button color="primary" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
                 <button mat-button color="primary" matTooltip="clear history"  type="button" (click)="clearHistory()">
                     Clear history
                 </button>
@@ -55,7 +55,7 @@
                 <mat-error *ngIf="messageForm?.get('text')?.invalid">Message is required</mat-error>
             </mat-form-field>
             <div class="buttons-grid">
-                <button mat-button color="primary" matTooltip="Send message" class="send-button" (click)="openSendMsgBottomSheet()">
+                <button mat-button color="primary" matTooltip="Send message" class="send-button" (click)="openSendMsgBottomSheet()" [disabled]="messageSent">
                     <mat-icon>send</mat-icon>
                 </button>
                 <button type="button" mat-button matTooltip="Upload image" class="fileupload-button" color="primary" 

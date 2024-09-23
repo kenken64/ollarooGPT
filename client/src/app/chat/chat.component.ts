@@ -39,6 +39,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   screenAvailWidth: number = 0;
   user: SessionUser | undefined = undefined
   userEmail?: string = "";
+  userName?: string = "";
   chatOwnerUsername: string = "Ollaroo";
   promptItemLists$:any;
   isMobileView?: boolean;
@@ -184,6 +185,7 @@ export class ChatComponent implements OnInit, OnDestroy{
     console.log(this.user?.name);
     console.log(this.user?.orig);
     this.userEmail = this.user?.orig;
+    this.userName = this.user?.name;
     this.loadTotalRecords();
     this.loadPromptItems();
     if(!Corbado.isAuthenticated){
@@ -212,7 +214,7 @@ export class ChatComponent implements OnInit, OnDestroy{
         reader.onload = (event:any) => {
             imageUrl = event.target.result;
             console.log(imageUrl);
-            this.messages.push({text: imageUrl, sender: this.userEmail!, 
+            this.messages.push({text: imageUrl, sender: this.userName!+' ('+this.userEmail! + ')', 
                 timestamp: new Date(), type:'img'});
         }
         reader.readAsDataURL(event.target.files[0]);
@@ -260,7 +262,7 @@ export class ChatComponent implements OnInit, OnDestroy{
               this.pdfUrl = window.URL.createObjectURL(fileblob); 
               console.log(this.pdfUrl);
               this.messages.push({text: this.fileName, 
-                  sender: this.userEmail!, timestamp: new Date(), type:'pdf'});
+                  sender: this.userName!+' ('+this.userEmail! + ')', timestamp: new Date(), type:'pdf'});
           }
           reader.readAsDataURL(event.target.files[0]);
           this.ollamaService.uploadPDFFile(formData).then(async (response)  => {
@@ -282,7 +284,7 @@ export class ChatComponent implements OnInit, OnDestroy{
     if(this.messageForm.valid){
       const text = this.messageForm.value.text;
       console.log('User: ' + text);
-      this.messages.push({text: text, sender: this.userEmail!, 
+      this.messages.push({text: text, sender: this.userName!+'-'+this.userEmail!, 
                 timestamp: new Date(), type:'msg'});
       this.addPromptMessagetoDexie(text);
       this.messageSent = true;
@@ -304,7 +306,7 @@ export class ChatComponent implements OnInit, OnDestroy{
     if(this.messageForm.valid){
       const text = this.messageForm.value.text;
       console.log('User: ' + text);
-      this.messages.push({text: text, sender: this.userEmail!, 
+      this.messages.push({text: text, sender: this.userName!+'-'+this.userEmail!, 
               timestamp: new Date(), type:'msg'});
       this.addPromptMessagetoDexie(text);
       this.messageSent = true;
@@ -325,7 +327,7 @@ export class ChatComponent implements OnInit, OnDestroy{
     if(this.messageForm.valid){
       const text = this.messageForm.value.text;
       console.log('User: ' + text);
-      this.messages.push({text: text, sender: this.userEmail!, 
+      this.messages.push({text: text, sender: this.userName!+'-'+this.userEmail!, 
               timestamp: new Date(), type:'msg'});
       this.messageSent = true;
       this.sunoSvc.generateSongFromSuno(text).then(async (response) => {

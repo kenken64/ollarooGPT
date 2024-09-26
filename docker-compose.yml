@@ -1,0 +1,58 @@
+networks:
+  my_network:
+    driver: bridge
+
+services:
+  ollama:
+    container_name: "ollama"
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    environment:
+      OLLAMA_HOST: ${OLLAMA_HOST}
+    ports:
+      - "11434:11434"
+    networks:
+      - my_network
+
+  ollamaserver:
+    container_name: "ollamaserver"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PINECONE_API_KEY: ${PINECONE_API_KEY}
+      PINECONE_INDEX_NAME: ${PINECONE_INDEX_NAME}
+      SUNO_API_URL: ${SUNO_API_URL}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
+      OLLAMA_MODEL: ${OLLAMA_MODEL}
+      VISUAL_MODEL: ${VISUAL_MODEL}
+      CORBADO_PROJECTID: ${CORBADO_PROJECTID}
+      CORBADO_API_KEY: ${CORBADO_API_KEY}
+      APP_PORT: ${APP_PORT}
+    restart: always
+    depends_on:
+      - suno-api
+      - ollama
+    links:
+      - suno-api
+      - ollama
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
+
+  suno-api:
+    container_name: "suno-api"
+    build:
+      context: ./suno-api
+      dockerfile: Dockerfile.dev
+    environment:
+      SUNO_COOKIE: ${SUNO_COOKIE}
+    volumes:
+      - ./public:/app/public
+    restart: always
+    ports:
+      - "3001:3000"
+    networks:
+      - my_network

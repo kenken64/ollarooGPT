@@ -1,8 +1,20 @@
-img {
+/* img {
     max-width: 100%;
     max-height: 100%;
 }
 
 mat-dialog-container {
     overflow-x:hidden
+} */
+
+.dialog-container {
+    max-width: 80%; /* Adjust the maximum width as needed */
+    height: 80%; /* Adjust the height as needed */
+    overflow-y: auto; /* Add vertical scrollbar when content overflows */
+}
+
+.image {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
 }

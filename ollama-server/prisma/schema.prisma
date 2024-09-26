@@ -1,0 +1,14 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:/Users/kennethphang/Projects/nus-iss-chatgpt/ollama-server/db/dev.db"
+}
+
+model document {
+    indexName   String @unique
+    filename    String
+    email       String
+}

@@ -13,12 +13,16 @@ const sdk = new SDK(config);
 const app = express()
 const port = process.env.APP_PORT;
 
+for (const key in process.env) {
+  console.log(key)
+  console.log(process.env[key]);
+}
 app.use(cors());
 app.use(morgan('tiny'));
 app.use(express.static('public'))
 
 app.use('/api', chatRouter);
 
-app.listen(port,() => {
+app.listen(port, process.env.APP_HOST,() => {
   console.log(`Ollama API Server listening on port ${port}`)
 })

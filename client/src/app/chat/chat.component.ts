@@ -19,9 +19,11 @@ import {
   MatDialogRef,
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface DialogData {
-  imageUrl: string;
+  imageUrl?: string;
+  lyrics?: string;
 }
 
 @Component({
@@ -49,7 +51,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   totalRecords = 0;
   totalPages = 0;
   lastPageRecords = 0;
-
+  
   @ViewChild('userMessages')
   private inputMessageRef?: ElementRef;
 
@@ -81,13 +83,12 @@ export class ChatComponent implements OnInit, OnDestroy{
 
   donate(){
     this.dialog
-      .open(DialogExpandImageDonationComponent)
+      .open(DialogExpandDonationComponent)
       .afterClosed()
       .subscribe(() => console.log('Open an Image'));
   }
 
   openSendMsgBottomSheet(): void {
-    console.log("open bottom sheet");
     const bottomSheetRef = this._bottomSheet.open(BottomSheetOverviewSendMsgSheet);
     bottomSheetRef.afterDismissed().subscribe((result) => {
       if (result) {
@@ -107,15 +108,10 @@ export class ChatComponent implements OnInit, OnDestroy{
   }
 
   populatePromptMsg(promptMsg: string){
-    console.log("populate the input text field");
-    console.log(promptMsg)
     this.messageForm.patchValue({text:promptMsg});
   }
 
   nextPage() {
-    console.log(this.currentPage);
-    console.log(this.totalPages);
-    
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
       this.loadPromptItems();
@@ -128,6 +124,14 @@ export class ChatComponent implements OnInit, OnDestroy{
       .open(DialogExpandImageComponent, { data: { imageUrl } })
       .afterClosed()
       .subscribe(() => console.log('Open an Image'));
+  }
+
+  async openLyricsDialog(inlyrics?: string){
+    let lyrics = await markdownToHtml(inlyrics!)
+    this.dialog
+      .open(DialogExpandLyricsComponent, { data: { lyrics } })
+      .afterClosed()
+      .subscribe(() => console.log('Open an Lyrics Window'));
   }
 
   previousPage() {
@@ -146,7 +150,6 @@ export class ChatComponent implements OnInit, OnDestroy{
       .count()
       .then(count => {
         this.totalRecords = count;
-        console.log(this.totalRecords);
         this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
         this.calculateLastPageRecords();
       });
@@ -165,10 +168,8 @@ export class ChatComponent implements OnInit, OnDestroy{
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    console.log(event.target.innerWidth);
     
     if(innerWidth< 430){
-      console.log("change mobile view")
       this.isMobileView = this.deviceService.isMobile();
     }
     this.cdr.detectChanges();
@@ -182,8 +183,6 @@ export class ChatComponent implements OnInit, OnDestroy{
     });
     // Get the user data from the Corbado SDK
     this.user = Corbado.user
-    console.log(this.user?.name);
-    console.log(this.user?.orig);
     this.userEmail = this.user?.orig;
     this.userName = this.user?.name;
     this.loadTotalRecords();
@@ -213,7 +212,6 @@ export class ChatComponent implements OnInit, OnDestroy{
         var reader = new FileReader();
         reader.onload = (event:any) => {
             imageUrl = event.target.result;
-            console.log(imageUrl);
             this.messages.push({text: imageUrl, sender: this.userName!+' ('+this.userEmail! + ')', 
                 timestamp: new Date(), type:'img'});
         }
@@ -257,10 +255,8 @@ export class ChatComponent implements OnInit, OnDestroy{
               let pdfBase64 = event.target.result;
               pdfBase64.replace(/^[^,]+,/, '');
               const base64Data = pdfBase64.split(',')[1];
-              console.log(base64Data);
               var fileblob = this.b64toBlob(base64Data, 'application/pdf');
               this.pdfUrl = window.URL.createObjectURL(fileblob); 
-              console.log(this.pdfUrl);
               this.messages.push({text: this.fileName, 
                   sender: this.userName!+' ('+this.userEmail! + ')', timestamp: new Date(), type:'pdf'});
           }
@@ -269,7 +265,6 @@ export class ChatComponent implements OnInit, OnDestroy{
             if(response.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/gm)){
               console.log("contains dot n number !");
             }
-            console.log(response);
             this.messages.push({text: response, 
                 sender: this.chatOwnerUsername, timestamp: new Date(), type:'msg'});
             this.messageSent = false;
@@ -280,11 +275,9 @@ export class ChatComponent implements OnInit, OnDestroy{
   }
 
   sendMessage() {
-    console.log("Sending...");
     if(this.messageForm.valid){
       const text = this.messageForm.value.text;
-      console.log('User: ' + text);
-      this.messages.push({text: text, sender: this.userName!+'-'+this.userEmail!, 
+      this.messages.push({text: text, sender: this.userName!+' ('+this.userEmail! + ')', 
                 timestamp: new Date(), type:'msg'});
       this.addPromptMessagetoDexie(text);
       this.messageSent = true;
@@ -302,16 +295,13 @@ export class ChatComponent implements OnInit, OnDestroy{
   }
 
   talktoPDF(){
-    console.log("Sending...");
     if(this.messageForm.valid){
       const text = this.messageForm.value.text;
-      console.log('User: ' + text);
-      this.messages.push({text: text, sender: this.userName!+'-'+this.userEmail!, 
+      this.messages.push({text: text, sender: this.userName!+' ('+this.userEmail! +')', 
               timestamp: new Date(), type:'msg'});
       this.addPromptMessagetoDexie(text);
       this.messageSent = true;
       this.ollamaService.chatwithOllamaPDF(text).then(async (response) => {
-        console.log(response);
         this.responseMessage = await markdownToHtml(response);
         this.messages.push({text: this.responseMessage, 
               sender: this.chatOwnerUsername, timestamp: new Date(), type:'msg'});
@@ -326,16 +316,23 @@ export class ChatComponent implements OnInit, OnDestroy{
   generateSong(): void {
     if(this.messageForm.valid){
       const text = this.messageForm.value.text;
-      console.log('User: ' + text);
-      this.messages.push({text: text, sender: this.userName!+'-'+this.userEmail!, 
+      this.messages.push({text: text, sender: this.userName!+' ('+this.userEmail! +')', 
               timestamp: new Date(), type:'msg'});
+      this.addPromptMessagetoDexie(text);
       this.messageSent = true;
       this.sunoSvc.generateSongFromSuno(text).then(async (response) => {
-        console.log(response[0]?.audio_url);
-        console.log(response[0]?.status);
         if(response[0]?.status === 'streaming'){
           this.messages.push({text: response[0]?.audio_url, 
-                  sender: this.chatOwnerUsername, timestamp: new Date(), type:'audio'});
+                  sender: this.chatOwnerUsername, 
+                  timestamp: new Date(), 
+                  type:'audio',
+                  lyrics: response[0]?.prompt});
+          this.messageSent = false;
+        }else{
+          this.messages.push({text: "Error generating song", 
+            sender: this.chatOwnerUsername, 
+            timestamp: new Date(), 
+            type:'msg'});
           this.messageSent = false;
         }
       });
@@ -399,11 +396,11 @@ export class DialogExpandImageComponent implements OnInit{
 }
 
 @Component({
-  selector: 'app-dialog-expand-image',
-  templateUrl: './dialog-expand-image-donate.component.html',
-  styleUrls: ['./dialog-expand-image-donate.component.css'],
+  selector: 'app-dialog-expand-donate',
+  templateUrl: './dialog-expand-donate.component.html',
+  styleUrls: ['./dialog-expand-donate.component.css'],
 })
-export class DialogExpandImageDonationComponent implements OnInit{
+export class DialogExpandDonationComponent implements OnInit{
   imageUrl: string ="/assets/payme.png";
   
   constructor(
@@ -413,6 +410,48 @@ export class DialogExpandImageDonationComponent implements OnInit{
   ngOnInit(): void {
     
   }
+
+  closeImage() {
+    this.dialogRef.close();
+  }
+}
+
+@Component({
+  selector: 'app-dialog-expand-image',
+  templateUrl: './dialog-expand-lyrics.component.html',
+  styleUrls: ['./dialog-expand-lyrics.component.css'],
+})
+export class DialogExpandLyricsComponent implements OnInit{
+  lyricsText: string | undefined;
+  public htmlContent: SafeHtml = '';
+  
+  constructor(
+    public dialogRef: MatDialogRef<DialogExpandImageComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData,
+    private sanitizer: DomSanitizer
+  ) {}
+
+  ngOnInit(): void {
+    this.lyricsText = this.data.lyrics;
+    let words = this.lyricsText!.split(' ');
+    words = words.map((word) => {
+      // Check if the first character is uppercase
+      if (this.isFirstCharUpperCase(word)) {
+        return "<br>" + word; 
+      }else if (word.includes(']')) {
+        console.log(`Word contains ']' : ${word}`);
+        return word + "<br>"; 
+      }
+ 
+      return word; // Return the word as is if it's not uppercase
+    });
+    const updatedStr = words.join(' ');
+    this.htmlContent = this.sanitizer.bypassSecurityTrustHtml(updatedStr);
+  }
+
+  isFirstCharUpperCase(word: string): boolean {
+    return /^[A-Z]/.test(word);
+  }  
 
   closeImage() {
     this.dialogRef.close();

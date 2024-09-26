@@ -31,12 +31,13 @@
                 <br>
                 <a *ngIf="message.type==='pdf'" [href]="pdfUrl" >"{{ message.text }}"</a>
                 <br>
+                <div *ngIf="message.type==='audio'">Here is your tune. 'Click Play' to enjoy. Here is the <a style="cursor: pointer;" (click)="openLyricsDialog(message.lyrics)"><b>lyrics</b></a></div>
                 <audio *ngIf="message.type==='audio'" controls src="{{ message.text }}"></audio>
         </div>
         <div *ngIf="!isMobileView" (window:resize)="onResize($event)" class="prompt-box-container">
             <div class="prompt-box">        
                 <ul *ngFor="let promptItem of (promptItemLists$ | async) let i = index;" >
-                    <li *ngIf="i < 6" matTooltip="{{ promptItem.prompt }}"><a (click)="populatePromptMsg(promptItem.prompt)">{{promptItem.prompt | slice:0:50}}...</a></li>
+                    <li *ngIf="i < 6" style="cursor: pointer;" matTooltip="{{ promptItem.prompt }}"><a (click)="populatePromptMsg(promptItem.prompt)">{{promptItem.prompt | slice:0:50}}...</a></li>
                 </ul>
                 <button mat-button color="primary" (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
                 <button mat-button color="primary" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>

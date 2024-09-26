@@ -3,4 +3,5 @@ export interface Message {
     sender: string;
     timestamp: Date;
     type: string;
+    lyrics?: string;
 }

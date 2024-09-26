@@ -16,3 +16,8 @@ docker run -p 3000:3000 -d --name kenken64-chatgpt -e PINECONE_API_KEY=fc6c7419-
 
 docker run --network host -d --name kenken64-chatgpt -e PINECONE_API_KEY=fc6c7419-50ae-4168-9375-3938f61b527e -e PINECONE_INDEX_NAME=pdf-genai -e SUNO_API_URL=http://host.docker.internal:3001/api/ -e OLLAMA_BASE_URL=http://host.docker.internal:11434 -e OLLAMA_MODEL=llama3.1:8b -e VISUAL_MODEL=minicpm-v -e CORBADO_PROJECTID=pro-0317338422706138772 -e CORBADO_API_KEY=corbado1_u3JXjKiVsnlruSsfAUU3jukhUnEAJp -e APP_PORT=3000 kenken64/chatgpt
 ```
+
+```
+docker-compose up -d --build
+
+```

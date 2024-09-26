@@ -15,6 +15,7 @@
     "@langchain/community": "^0.2.31",
     "@langchain/ollama": "^0.0.4",
     "@pinecone-database/pinecone": "^3.0.2",
+    "@prisma/client": "^5.19.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
@@ -22,7 +23,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^3.3.2",
-    "ollama": "^0.4.8",
+    "ollama": "^0.5.9",
     "pdf-parse": "^1.1.1"
   }
 }

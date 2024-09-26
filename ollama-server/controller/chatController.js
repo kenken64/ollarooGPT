@@ -1,13 +1,16 @@
-import ollama from 'ollama'
+//import ollama from 'ollama'
+import { Ollama as ollama } from 'ollama'
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { OllamaEmbeddings } from "@langchain/ollama";
 import { loadQAStuffChain } from "langchain/chains";
 import { Document } from "langchain/document";
-import { Ollama } from "@langchain/ollama";
+import { Ollama as OllamaLG } from "@langchain/ollama";
 import fetch from 'node-fetch';
 import { Pinecone } from '@pinecone-database/pinecone';
 import fs from 'fs';
+import { createDocumentToDB } from '../utils/db/document/documentCreatePrisma.js';
+import { listDocumentsFromDB } from '../utils/db/document/documentListPrisma.js';
 
 function toBase64(filePath) {
     console.log(filePath)
@@ -19,7 +22,6 @@ console.log(process.env.PINECONE_API_KEY);
 const pc = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY
 });
-
 
 try{
   await pc.createIndex({
@@ -38,7 +40,6 @@ try{
   console.log("Assigned existing index")
   var index = pc.Index(process.env.PINECONE_INDEX_NAME)
 }
-
 
 // Set up a route for file uploads
 export const uploadFile = async (req, res) => {
@@ -76,6 +77,7 @@ export const chatOllama =  async (req, res) => {
             return_type: 'markdown'
         })
         console.log(response.message.content)
+        console.log('Using Ollama base URL:', ollama.baseUrl);
         res.status(200).json(response.message.content)
     }catch(error){
         console.error(error);
@@ -83,6 +85,26 @@ export const chatOllama =  async (req, res) => {
     }
 };
 
+export const getAllDocuments = async (req, res) => {
+  try {
+      const docs = await listDocumentsFromDB();
+      res.json(docs); // Respond with the list of users in JSON format
+  } catch (error) {
+      console.error('Failed to fetch documents:', error);
+      res.status(500).json({ error: 'Failed to fetch documents' });
+  }
+};
+
+export const saveDocument = async (req, res) => {
+  try {
+      let document = req.body;
+      const doc = await createDocumentToDB(document);
+      res.json(doc); // Respond with the list of users in JSON format
+  } catch (error) {
+      console.error('Failed to create document:', error);
+      res.status(500).json({ error: 'Failed to create document' });
+  }
+};
 
 export const chatWithPDF =  async (req, res) => {
     let responseResult = '';
@@ -107,7 +129,7 @@ export const chatWithPDF =  async (req, res) => {
     console.log(`Found ${queryResponse.matches.length} matches...`);
     console.log(`Asking question: ${question}...`);
     if (queryResponse.matches.length) {
-      const llm = new Ollama({
+      const llm = new OllamaLG({
         model: process.env.OLLAMA_MODEL, // Default value
         baseUrl: process.env.OLLAMA_BASE_URL, // Default value
           return_type: 'markdown'
@@ -142,7 +164,7 @@ export const uploadGenAIPDF =  async (req, res) => {
       const txtPath = doc.metadata.source;
       const text = doc.pageContent;
       const textSplitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 30000,
+        chunkSize: 1000,
       });
       console.log("Splitting text into chunks...");
       const chunks = await textSplitter.createDocuments([text]);
@@ -221,6 +243,7 @@ function normalizeVector(vector, targetDimension) {
 
 export const generateAISong = async(req,res) =>{
     let sunoApiUrl = process.env.SUNO_API_URL;
+    console.log(sunoApiUrl);
     let question = req.query.message;
     if(question.length > 4096){
       res.status(500).json({ error: 'Prompt message exceed 4096' });

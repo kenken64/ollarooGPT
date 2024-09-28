@@ -51,6 +51,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   totalRecords = 0;
   totalPages = 0;
   lastPageRecords = 0;
+  messageNow: Date = new Date();
   
   @ViewChild('userMessages')
   private inputMessageRef?: ElementRef;
@@ -92,7 +93,9 @@ export class ChatComponent implements OnInit, OnDestroy{
     const bottomSheetRef = this._bottomSheet.open(BottomSheetOverviewSendMsgSheet);
     bottomSheetRef.afterDismissed().subscribe((result) => {
       if (result) {
+        this.messageNow = new Date();
         if(result === 'SM'){
+          this.messageNow = new Date();
           this.sendMessage();
         }else if(result === 'APDF'){
           this.talktoPDF();
@@ -326,7 +329,10 @@ export class ChatComponent implements OnInit, OnDestroy{
                   sender: this.chatOwnerUsername, 
                   timestamp: new Date(), 
                   type:'audio',
-                  lyrics: response[0]?.prompt});
+                  lyrics: response[0]?.prompt,
+                  image_url: response[0].image_url,
+                  title: response[0].title
+                });
           this.messageSent = false;
         }else{
           this.messages.push({text: "Error generating song", 
@@ -350,6 +356,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   async logout(){
     if (Corbado.isAuthenticated) {
       Corbado.logout();
+      db.clearAuthToken();
       this.router.navigate(['']);
     }
   }

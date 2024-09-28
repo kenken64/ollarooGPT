@@ -4,3 +4,20 @@ mat-card-content {
     height: 100vh;
     align-items: center;
 }
+
+.ollaroo-passkey {
+    --cb-box-color: #3f465d;
+    --cb-primary-color-hover: #1145df80;
+    --cb-primary-color-disabled: #6f7486;
+    --cb-script-text-color: #d0d9f5;
+    --cb-box-color-hover: #525d83;
+
+    .cb-container {
+        width: 500px;
+    }
+
+    .cb-error-popup {
+        gap: 1rem;
+        padding: 2rem 3rem;
+    }
+}

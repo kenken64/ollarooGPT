@@ -7,8 +7,10 @@ import {SDK, Config} from '@corbado/node-sdk';
  
 const projectID = process.env.CORBADO_PROJECTID;
 const apiSecret = process.env.CORBADO_API_KEY;
- 
-const config = new Config(projectID, apiSecret);
+const frontendAPI = process.env.CORBADO_FRONTENDAPI;
+const backendAPI = process.env.CORBADO_BACKENDAPI;
+
+const config = new Config(projectID, apiSecret, frontendAPI, backendAPI);
 const sdk = new SDK(config);
 const app = express()
 const port = process.env.APP_PORT;
@@ -18,11 +20,18 @@ for (const key in process.env) {
   console.log(process.env[key]);
 }
 app.use(cors());
-app.use(morgan('tiny'));
-app.use(express.static('public'))
 
+morgan.token('body', req => {
+  return JSON.stringify(req.headers) + "\n" 
+            +JSON.stringify(req.body)
+})
+
+app.use(morgan(':method :url :body'))
+
+app.use(express.static('public'))
+app.use(express.urlencoded({ extended: false }));
 app.use('/api', chatRouter);
 
-app.listen(port, process.env.APP_HOST,() => {
-  console.log(`Ollama API Server listening on port ${port}`)
+app.listen(port ,() => {
+  console.log(`Ollama API Server listening on port ${process.env.APP_HOST}:${port}`)
 })

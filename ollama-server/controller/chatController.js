@@ -1,11 +1,10 @@
-//import ollama from 'ollama'
-import { Ollama as ollama } from 'ollama'
+import ollama  from 'ollama'
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { OllamaEmbeddings } from "@langchain/ollama";
 import { loadQAStuffChain } from "langchain/chains";
 import { Document } from "langchain/document";
-import { Ollama as OllamaLG } from "@langchain/ollama";
+import { Ollama } from "@langchain/ollama";
 import fetch from 'node-fetch';
 import { Pinecone } from '@pinecone-database/pinecone';
 import fs from 'fs';
@@ -22,24 +21,6 @@ console.log(process.env.PINECONE_API_KEY);
 const pc = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY
 });
-
-try{
-  await pc.createIndex({
-    name: process.env.PINECONE_INDEX_NAME,
-    dimension: 5120, // Replace with your model dimensions
-    metric: 'euclidean', // Replace with your model metric
-    spec: { 
-        serverless: { 
-            cloud: 'aws', 
-            region: 'us-east-1' 
-        }
-    } 
-  });
-}catch(e){
-  console.log('Error creating index!');
-  console.log("Assigned existing index")
-  var index = pc.Index(process.env.PINECONE_INDEX_NAME)
-}
 
 // Set up a route for file uploads
 export const uploadFile = async (req, res) => {
@@ -107,6 +88,7 @@ export const saveDocument = async (req, res) => {
 };
 
 export const chatWithPDF =  async (req, res) => {
+    var index = pc.Index(process.env.PINECONE_INDEX_NAME)
     let responseResult = '';
     console.log('message: ' + req.query.message)
     let question = req.query.message;
@@ -129,7 +111,7 @@ export const chatWithPDF =  async (req, res) => {
     console.log(`Found ${queryResponse.matches.length} matches...`);
     console.log(`Asking question: ${question}...`);
     if (queryResponse.matches.length) {
-      const llm = new OllamaLG({
+      const llm = new Ollama({
         model: process.env.OLLAMA_MODEL, // Default value
         baseUrl: process.env.OLLAMA_BASE_URL, // Default value
           return_type: 'markdown'
@@ -154,6 +136,23 @@ export const chatWithPDF =  async (req, res) => {
 }
 
 export const uploadGenAIPDF =  async (req, res) => {
+    try{
+      await pc.createIndex({
+        name: process.env.PINECONE_INDEX_NAME,
+        dimension: 5120, // Replace with your model dimensions
+        metric: 'euclidean', // Replace with your model metric
+        spec: { 
+            serverless: { 
+                cloud: 'aws', 
+                region: 'us-east-1' 
+            }
+        } 
+      });
+    }catch(e){
+      console.log('Error creating index!');
+      console.log("Assigned existing index")
+      var index = pc.Index(process.env.PINECONE_INDEX_NAME)
+    }
     // Handle the uploaded file
     console.log("uploading pdf ...");
     console.log(req.file);
@@ -212,7 +211,9 @@ export const uploadGenAIPDF =  async (req, res) => {
           }
           console.log("...upsert !");
           try{
+            console.log("...upsert !");
             await index?.upsert(batches);
+            console.log("...upsert !");
           }catch(error){
             console.log("error !!!!")
             console.log(error)

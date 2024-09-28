@@ -4,4 +4,6 @@ export interface Message {
     timestamp: Date;
     type: string;
     lyrics?: string;
+    title?: string;
+    image_url?: string;
 }

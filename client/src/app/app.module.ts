@@ -15,7 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -26,6 +26,7 @@ import { AlignLogoutButtonPipe } from './shared/alignlogout.btn.pipe';
 import { LoginComponent } from './security/login/login.component';
 import { OrderByPipe } from './shared/orderby.pipe';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { authInterceptor } from './shared/corbado-interceptor';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -38,7 +39,8 @@ import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
         AlignLogoutButtonPipe,
         OrderByPipe,
     ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
+    bootstrap: [AppComponent], 
+    imports: [BrowserModule,
         AppRoutingModule,
         BrowserAnimationsModule,
         ReactiveFormsModule,
@@ -53,5 +55,9 @@ import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
         MatIconModule,
         MatProgressSpinnerModule,
         MatBottomSheetModule,
-        MatTooltipModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+        MatTooltipModule], 
+    providers: [
+        provideHttpClient(withInterceptors([authInterceptor]))
+    ] 
+})
 export class AppModule { }

@@ -17,7 +17,7 @@
                 "react-dom/client",
                 "void-elements",
                 "lodash",
-		"react"
+		            "react"
             ],
             "outputPath": {
               "base": "dist/client"

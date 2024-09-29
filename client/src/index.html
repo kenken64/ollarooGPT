@@ -9,6 +9,27 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script>
+    (function () {
+      var script=document.createElement("script");
+      script.src="https://analyze.corbado.com/assets/bundle.js";
+      script.defer=true;
+      var head=document.getElementsByTagName("head")[0];
+      var done=false;
+    
+      script.onload=script.onreadystatechange = function(){
+        if (!done && (!this.readyState || this.readyState == "loaded" || this.readyState == "complete") ) {
+          done=true;
+          tracking.visit({
+            projectID: "pro-0317338422706138772"
+          });
+          script.onload = script.onreadystatechange = null;
+          head.removeChild(script);
+        }
+      };
+      head.appendChild(script);
+    })();
+    </script>
 </head>
 <body class="mat-typography">
   <app-root></app-root>

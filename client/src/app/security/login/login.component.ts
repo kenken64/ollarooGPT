@@ -24,7 +24,8 @@ export class LoginComponent implements OnInit{
           // mount Corbado auth UI for the user to sign in or sign up
           Corbado.mountAuthUI(authElement, {
               onLoggedIn: () => {
-                  console.log(Corbado.shortSession)
+                  console.log(Corbado.shortSession);
+                  console.log(Corbado.shortSessionChanges);
                   db.addAuthToken({
                     token:Corbado.shortSession
                   });

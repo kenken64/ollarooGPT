@@ -15,10 +15,6 @@ const sdk = new SDK(config);
 const app = express()
 const port = process.env.APP_PORT;
 
-for (const key in process.env) {
-  console.log(key)
-  console.log(process.env[key]);
-}
 app.use(cors());
 
 morgan.token('body', req => {

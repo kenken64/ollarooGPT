@@ -14,7 +14,7 @@ const config = new Config(projectID, apiSecret, frontendAPI, backendAPI);
 const sdk = new SDK(config);
 const app = express()
 const port = process.env.APP_PORT;
-
+const serverHost = process.env.APP_HOST;
 app.use(cors());
 
 morgan.token('body', req => {
@@ -28,6 +28,9 @@ app.use(express.static('public'))
 app.use(express.urlencoded({ extended: false }));
 app.use('/api', chatRouter);
 
-app.listen(port ,() => {
-  console.log(`Ollama API Server listening on port ${process.env.APP_HOST}:${port}`)
-})
+const host = serverHost === 'localhost' ? undefined : serverHost;
+
+app.listen(port, host, () => {
+  console.log(`Ollama API Server listening on ${serverHost}:${port}`);
+});
+

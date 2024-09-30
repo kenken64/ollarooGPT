@@ -1,4 +1,5 @@
 import ollama  from 'ollama'
+import { Ollama as OllamaB } from 'ollama'
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { OllamaEmbeddings } from "@langchain/ollama";
@@ -10,6 +11,7 @@ import { Pinecone } from '@pinecone-database/pinecone';
 import fs from 'fs';
 import { createDocumentToDB } from '../utils/db/document/documentCreatePrisma.js';
 import { listDocumentsFromDB } from '../utils/db/document/documentListPrisma.js';
+import pdf from 'pdf-thumbnail';
 
 function toBase64(filePath) {
     console.log(filePath)
@@ -25,9 +27,9 @@ const pc = new Pinecone({
 // Set up a route for file uploads
 export const uploadFile = async (req, res) => {
     try{
-        console.log(req.file);
         // Handle the uploaded file
         let imageInBase64 = toBase64(req.file.path);
+        const ollama = new OllamaB({ host: process.env.OLLAMA_BASE_URL })
         const response = await ollama.chat({
             model: process.env.VISUAL_MODEL,
             messages: [{ role: 'user', 
@@ -45,12 +47,12 @@ export const uploadFile = async (req, res) => {
 
 export const chatOllama =  async (req, res) => {
     try{
-        console.log('message: ' + req.query.message)
-        console.log(process.env.OLLAMA_BASE_URL)
         let msg = req.query.message
         if(msg.length > 4096){
           res.status(500).json({ error: 'Prompt message exceed 4096' });
         }
+        // temp fix or hack to force the host connecting to the host ollama serve
+        const ollama = new OllamaB({ host: process.env.OLLAMA_BASE_URL })
         const response = await ollama.chat({
             model: process.env.OLLAMA_MODEL, // Default value
             baseUrl: process.env.OLLAMA_BASE_URL, // Default value
@@ -58,7 +60,11 @@ export const chatOllama =  async (req, res) => {
             return_type: 'markdown'
         })
         console.log(response.message.content)
-        console.log('Using Ollama base URL:', ollama.baseUrl);
+        console.log("Number of tokens > "+  response.eval_count);
+        const eval_duration_seconds = response.eval_duration / 1e9;
+        const total_duration_seconds = response.total_duration / 1e9;
+        console.log("Eval duration in secs > " + eval_duration_seconds);
+        console.log("Total duration in secs > " + total_duration_seconds);
         res.status(200).json(response.message.content)
     }catch(error){
         console.error(error);
@@ -90,7 +96,6 @@ export const saveDocument = async (req, res) => {
 export const chatWithPDF =  async (req, res) => {
     var index = pc.Index(process.env.PINECONE_INDEX_NAME)
     let responseResult = '';
-    console.log('message: ' + req.query.message)
     let question = req.query.message;
     if(question.length > 4096){
       res.status(500).json({ error: 'Prompt message exceed 4096' });
@@ -101,7 +106,6 @@ export const chatWithPDF =  async (req, res) => {
         baseUrl: process.env.OLLAMA_BASE_URL, // Default value
       }
     ).embedQuery(question);
-    console.log(queryEmbedding);
     let queryResponse = await index.query({
         topK: 10,
         vector: queryEmbedding,
@@ -117,12 +121,10 @@ export const chatWithPDF =  async (req, res) => {
           return_type: 'markdown'
       });
       const chain = loadQAStuffChain(llm);
-      console.log(queryResponse);
       const concatenatedPageContent = queryResponse.matches
         .map((match) => match.metadata.pageContent)
         .join(" ");
   
-      console.log(concatenatedPageContent);
       const result = await chain.invoke({
         input_documents: [new Document({ pageContent: concatenatedPageContent })],
         question: question,
@@ -137,6 +139,10 @@ export const chatWithPDF =  async (req, res) => {
 
 export const uploadGenAIPDF =  async (req, res) => {
     try{
+      // Handle the uploaded file
+      console.log("uploading pdf ...");
+      console.log(req.file);
+      
       await pc.createIndex({
         name: process.env.PINECONE_INDEX_NAME,
         dimension: 5120, // Replace with your model dimensions
@@ -153,9 +159,12 @@ export const uploadGenAIPDF =  async (req, res) => {
       console.log("Assigned existing index")
       var index = pc.Index(process.env.PINECONE_INDEX_NAME)
     }
-    // Handle the uploaded file
-    console.log("uploading pdf ...");
-    console.log(req.file);
+    console.log(req.file.path);
+    
+    //with stream
+    pdf(fs.createReadStream(req.file.path))
+      .then(data /*is a stream*/ => data.pipe(fs.createWriteStream(req.file.path +".jpg")))
+      .catch(err => console.error(err))
     const loader = new PDFLoader(req.file.path);
     const docs = await loader.load();
     for (const doc of docs) {
@@ -200,22 +209,13 @@ export const uploadGenAIPDF =  async (req, res) => {
               },
             };
             console.log("pushing...")
-            console.log(vector)
             const x =normalizeVector(vector, 5120)
-            console.log(x)
             batches.push(x);
-            console.log("VLVL>>>>>" + embeddingsArrays.length);
-            // When batch is full or it's the last item, upsert the vectors
-            console.log(batches.length)
-            console.log(chunk.length)
           }
-          console.log("...upsert !");
+          
           try{
-            console.log("...upsert !");
             await index?.upsert(batches);
-            console.log("...upsert !");
           }catch(error){
-            console.log("error !!!!")
             console.log(error)
           }
           // Empty the batch
@@ -244,13 +244,12 @@ function normalizeVector(vector, targetDimension) {
 
 export const generateAISong = async(req,res) =>{
     let sunoApiUrl = process.env.SUNO_API_URL;
-    console.log(sunoApiUrl);
+    
     let question = req.query.message;
     if(question.length > 4096){
       res.status(500).json({ error: 'Prompt message exceed 4096' });
     }
-    console.log(question);
-    console.log(sunoApiUrl);
+  
     const body = {
       prompt: question,
       make_instrumental: false,
@@ -262,8 +261,6 @@ export const generateAISong = async(req,res) =>{
       headers: {'Content-Type': 'application/json'}
     });
     const data = await response.json();
-  
-    console.log(data);
     res.status(200).json(data);
   };
   

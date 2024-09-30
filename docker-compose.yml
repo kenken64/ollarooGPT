@@ -8,10 +8,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.ollama
-    environment:
-      OLLAMA_HOST: ${OLLAMA_HOST}
+    deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
     ports:
-      - "11434:11434"
+       - "11434:11434"
     networks:
       - my_network
 
@@ -29,7 +34,19 @@ services:
       VISUAL_MODEL: ${VISUAL_MODEL}
       CORBADO_PROJECTID: ${CORBADO_PROJECTID}
       CORBADO_API_KEY: ${CORBADO_API_KEY}
+      CORBADO_FRONTENDAPI: ${CORBADO_FRONTENDAPI}
+      CORBADO_BACKENDAPI: ${CORBADO_BACKENDAPI}
       APP_PORT: ${APP_PORT}
+      APP_HOST: ${APP_HOST}
+      OLLAMA_HOST: ${OLLAMA_HOST}
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 10GB
+        reservations:
+          cpus: '2'
+          memory: 10GB
     restart: always
     depends_on:
       - suno-api

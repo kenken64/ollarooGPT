@@ -18,6 +18,6 @@ docker run --network host -d --name kenken64-chatgpt -e PINECONE_API_KEY=fc6c741
 ```
 
 ```
-docker-compose up -d --build
+docker compose up -d --build
 
 ```

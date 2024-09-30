@@ -19,7 +19,7 @@
     </div>
     
     <div class="center">
-        <mat-spinner *ngIf="messageSent"></mat-spinner>
+        <mat-spinner *ngIf="messageSent" mode="indeterminate" color="warn"></mat-spinner>
     </div>
 
     <div #userMessages class="scrollable-y">
@@ -60,10 +60,10 @@
                     <mat-icon>send</mat-icon>
                 </button>
                 <button type="button" mat-button matTooltip="Upload image" class="fileupload-button" color="primary" 
-                    (click)="fileUpload.click()" [disabled]="messageSent">
+                    (click)="fileUpload.click()" [disabled]="messageSent" >
                     <mat-icon>file_copy</mat-icon>
                 </button>
-                <input hidden type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload>
+                <input hidden type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload accept="image/png, image/jpeg">
             </div>       
         </form>
     </div>

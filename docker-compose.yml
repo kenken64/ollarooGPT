@@ -9,12 +9,12 @@ services:
       context: .
       dockerfile: Dockerfile.ollama
     deploy:
-    resources:
-      reservations:
-        devices:
-          - driver: nvidia
-            count: 1
-            capabilities: [gpu]
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     ports:
        - "11434:11434"
     networks:

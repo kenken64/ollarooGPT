@@ -18,25 +18,12 @@ RUN ng build
 
 FROM node:lts-alpine AS backend
 
-# ENV PINECONE_API_KEY=${PINECONE_API_KEY}
-# ENV PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
-# ENV SUNO_API_URL=${SUNO_API_URL}
-# ENV OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
-# ENV OLLAMA_MODEL=${OLLAMA_MODEL}
-# ENV VISUAL_MODEL=${VISUAL_MODEL}
-# ENV CORBADO_PROJECTID=${CORBADO_PROJECTID}
-# ENV CORBADO_API_KEY=${CORBADO_API_KEY}
-# ENV CORBADO_FRONTENDAPI=${CORBADO_FRONTENDAPI}
-# ENV CORBADO_BACKENDAPI=${CORBADO_BACKENDAPI}
-# ENV APP_PORT=${APP_PORT}
-# ENV OLLAMA_HOST=${OLLAMA_HOST}
 
 WORKDIR /ollama-server
 COPY ollama-server/package.json .
 
 RUN npm install
 
-COPY ollama-server/public public
 COPY --from=ngbuild client/dist/client/browser /ollama-server/public
 COPY ollama-server/index.js .
 COPY ollama-server/controller controller

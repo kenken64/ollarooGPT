@@ -1,0 +1,47 @@
+.flex-container {
+    display: flex;
+    gap: 20px; /* space between items */
+}
+
+.example-spacer {
+    flex: 1 1 auto;
+}
+.app-title {
+    color: white;
+    margin: 1;
+}
+
+.example-button-row {
+    display: table-cell;
+    max-width: 600px;
+  }
+  
+.example-button-row .mat-mdc-button-base {
+    margin: 8px 8px 8px 0;
+}
+
+.example-flex-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: center; /* Centers content horizontally */
+    align-items: center; /* Optional: Centers content vertically */
+}
+
+.example-button-container {
+    display: flex;
+    justify-content: center;
+    width: 120px;
+}
+
+.search-container {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically (optional) */
+    height: 20vh; /* Set a height if you want it centered vertically within the viewport */
+  }
+  
+  mat-form-field {
+    width: 700px; /* Adjust the width of the search field */
+  }
+  

@@ -179,6 +179,24 @@ mat-grid-tile {
     cursor: pointer;
   }
   
+  .togoDocs-button {
+    background: rgb(113, 40, 230);
+    position: absolute;
+    margin-left: auto;
+    right: 210px;
+    top: 4%;
+    transform: translateY(-50%);
+    padding: 5px 10px;
+    color: rgb(113, 40, 230);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .togoDocs-button:hover {
+    background-color: rgb(113, 40, 230);
+  }
+
   .pdffileupload-button:hover {
     background-color: rgb(113, 40, 230);
   }

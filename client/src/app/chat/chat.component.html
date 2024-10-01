@@ -1,15 +1,15 @@
 <div class="chat-container">
     <div class="chat-header">
         <div class="circle-image" [matTooltip]="userEmail!"></div>
-        <h1 class="app-title">Ollaroo v1</h1>
+        <h1 class="app-title">Ollaroo</h1>
+        <button mat-button color="primary" matTooltip="Navigate to documents" class="togoDocs-button" type="button" (click)="gotoDocuments()" [ngStyle]="screenAvailWidth | alignDocsButton">
+            <mat-icon class="file-icon">book</mat-icon>
+        </button>
         <button type="button" mat-button matTooltip="Upload PDF" class="pdffileupload-button" [ngStyle]="screenAvailWidth | alignUploadButton" color="primary" 
             (click)="pdfUpload.click()" [disabled]="messageSent">
             <mat-icon class="file-icon">description</mat-icon>
         </button>
         <input hidden type="file" class="file-input" accept="application/pdf" (change)="onPDFFileSelected($event)" #pdfUpload>
-        <!-- <button mat-button color="primary" matTooltip="Send message" class="pdfsend-button" type="button" (click)="talktoPDF()" [ngStyle]="screenAvailWidth | alignUploadButton">
-            <mat-icon class="file-icon">send</mat-icon>
-        </button>-->
         <button mat-button color="primary" matTooltip="Donate" class="musicsend-button" type="button" (click)="donate()" [ngStyle]="screenAvailWidth | alignSendMusicButton">
             <mat-icon class="file-icon">currency_bitcoin</mat-icon>
         </button>

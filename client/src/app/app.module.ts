@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -15,7 +15,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -27,16 +28,21 @@ import { LoginComponent } from './security/login/login.component';
 import { OrderByPipe } from './shared/orderby.pipe';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { authInterceptor } from './shared/corbado-interceptor';
+import { DocumentsComponent } from './documents/documents.component';
+import { CustomErrorHandlerService } from './shared/global.error.interceptor';
+import { AlignDocsButtonPipe } from './shared/aligndocs.btn.pipe';
 
 @NgModule({ declarations: [
         AppComponent,
         ChatComponent,
         LoginComponent,
+        DocumentsComponent,
         BottomSheetOverviewSendMsgSheet,
         AlignSendButtonPipe,
         AlignUploadButtonPipe,
         AlignSendMusicButtonPipe,
         AlignLogoutButtonPipe,
+        AlignDocsButtonPipe,
         OrderByPipe,
     ],
     bootstrap: [AppComponent], 
@@ -55,9 +61,11 @@ import { authInterceptor } from './shared/corbado-interceptor';
         MatIconModule,
         MatProgressSpinnerModule,
         MatBottomSheetModule,
-        MatTooltipModule], 
+        MatTooltipModule,
+        MatToolbarModule],
     providers: [
-        provideHttpClient(withInterceptors([authInterceptor]))
+        provideHttpClient(withInterceptors([authInterceptor])),
+        {provide: ErrorHandler, useClass: CustomErrorHandlerService},
     ] 
 })
 export class AppModule { }

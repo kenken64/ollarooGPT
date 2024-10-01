@@ -360,6 +360,10 @@ export class ChatComponent implements OnInit, OnDestroy{
       this.router.navigate(['']);
     }
   }
+
+  gotoDocuments(){
+    this.router.navigate(['documents'])
+  }
 }
 
 @Component({

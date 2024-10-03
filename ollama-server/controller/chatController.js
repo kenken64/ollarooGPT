@@ -141,7 +141,7 @@ export const uploadGenAIPDF =  async (req, res) => {
     try{
       // Handle the uploaded file
       console.log("uploading pdf ...");
-      console.log(req.file);
+      //console.log(req.file);
       
       await pc.createIndex({
         name: process.env.PINECONE_INDEX_NAME,
@@ -159,7 +159,7 @@ export const uploadGenAIPDF =  async (req, res) => {
       console.log("Assigned existing index")
       var index = pc.Index(process.env.PINECONE_INDEX_NAME)
     }
-    console.log(req.file.path);
+    //console.log(req.file.path);
     
     //with stream
     pdf(fs.createReadStream(req.file.path))
@@ -180,7 +180,7 @@ export const uploadGenAIPDF =  async (req, res) => {
       console.log(
         `Calling Ollama's Embedding endpoint documents with ${chunks.length} text chunks ...`
       );
-      console.log(index);
+      //console.log(index);
       const embeddings = new OllamaEmbeddings({
         model: process.env.OLLAMA_MODEL, // Default value
         baseUrl: process.env.OLLAMA_BASE_URL, // Default value
@@ -197,7 +197,7 @@ export const uploadGenAIPDF =  async (req, res) => {
       if(chunks.length >0){
         for (let idx = 0; idx < chunks.length; idx++) {
             const chunk = chunks[idx];
-            console.log(chunk.pageContent);
+            //console.log(chunk.pageContent);
             const vector = {
               id: `${txtPath}_${idx}${Date.now()}`,
               values: embeddingsArrays[idx],
@@ -208,12 +208,13 @@ export const uploadGenAIPDF =  async (req, res) => {
                 txtPath: txtPath,
               },
             };
-            console.log("pushing...")
+            //console.log("pushing...")
             const x =normalizeVector(vector, 5120)
             batches.push(x);
           }
           
           try{
+            console.log("upsert!")
             await index?.upsert(batches);
           }catch(error){
             console.log(error)
@@ -222,7 +223,14 @@ export const uploadGenAIPDF =  async (req, res) => {
           batches = [];
       }
     }
-   
+    let sqlDocument = {
+      indexName: req.file.filename,
+      filename: req.file.filename,
+      thumbnail: req.file.path +".jpg",
+      email: req.body.email
+    }
+    console.log(">>>>>" + JSON.stringify(sqlDocument))
+    //const doc = await createDocumentToDB(sqlDocument);
     res.status(200).json("I have reviewed the PDF you uploaded and am now familiar with its contents. Feel free to ask me anything related to the document.");
 };
 

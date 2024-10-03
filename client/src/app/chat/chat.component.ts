@@ -118,7 +118,7 @@ export class ChatComponent implements OnInit, OnDestroy{
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
       this.loadPromptItems();
-      this.loadTotalRecords()
+      this.loadTotalRecords();
     }
   }
 
@@ -167,6 +167,8 @@ export class ChatComponent implements OnInit, OnDestroy{
   // clear records from dexie
   async clearHistory(){
     await db.promptItems.clear();
+    this.loadPromptItems();
+    this.loadTotalRecords();
   }
 
   @HostListener('window:resize', ['$event'])
@@ -187,7 +189,16 @@ export class ChatComponent implements OnInit, OnDestroy{
     // Get the user data from the Corbado SDK
     this.user = Corbado.user
     this.userEmail = this.user?.orig;
-    this.userName = this.user?.name;
+    console.log(this.user);
+    if(this.user?.name == undefined){
+      let nameArr = this.user?.orig.split('@')
+      console.log(nameArr)
+      console.log(nameArr![0])
+      this.userName = nameArr![0]
+    } else {
+      this.userName = this.user?.name;
+    }
+    
     this.loadTotalRecords();
     this.loadPromptItems();
     if(!Corbado.isAuthenticated){
@@ -253,6 +264,7 @@ export class ChatComponent implements OnInit, OnDestroy{
           this.fileName = pdfFile.name;
           const formData = new FormData();
           formData.append("pdf-file", pdfFile);
+          formData.append('email', this.userEmail!);
           var reader = new FileReader();
           reader.onload = (event:any) => {
               let pdfBase64 = event.target.result;
@@ -291,6 +303,8 @@ export class ChatComponent implements OnInit, OnDestroy{
         this.messageSent = false;
       });
 
+      this.loadPromptItems();
+      this.loadTotalRecords();
       this.messageForm.reset();
       this.chatFormEle?.resetForm();
       this.scrollToBottom();
@@ -311,6 +325,8 @@ export class ChatComponent implements OnInit, OnDestroy{
         this.messageSent = false;
       });
 
+      this.loadPromptItems();
+      this.loadTotalRecords();
       this.messageForm.reset();
       this.scrollToBottom();
     }
@@ -342,6 +358,8 @@ export class ChatComponent implements OnInit, OnDestroy{
           this.messageSent = false;
         }
       });
+      this.loadPromptItems();
+      this.loadTotalRecords();
       this.messageForm.reset();
     }
   }

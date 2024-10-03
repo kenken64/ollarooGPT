@@ -40,7 +40,7 @@
                     <li *ngIf="i < 6" style="cursor: pointer;" matTooltip="{{ promptItem.prompt }}"><a (click)="populatePromptMsg(promptItem.prompt)">{{promptItem.prompt | slice:0:50}}...</a></li>
                 </ul>
                 <button mat-button color="primary" (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
-                <button mat-button color="primary" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+                <button mat-button color="primary" (click)="nextPage()" [disabled]="currentPage === totalPages || (currentPage ==1 && totalPages ==0)">Next</button>
                 <button mat-button color="primary" matTooltip="clear history"  type="button" (click)="clearHistory()">
                     Clear history
                 </button>

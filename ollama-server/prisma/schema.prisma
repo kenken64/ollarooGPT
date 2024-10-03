@@ -4,11 +4,12 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:/Users/kennethphang/Projects/nus-iss-chatgpt/ollama-server/db/dev.db"
+  url      = env("SQLLITE_DATABASE_DIR")
 }
 
 model document {
     indexName   String @unique
     filename    String
+    thumbnail    String
     email       String
 }

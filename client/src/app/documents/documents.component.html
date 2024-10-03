@@ -4,7 +4,7 @@
             <div class="example-button-row">
                 <div class="example-flex-container">
                   <div class="example-button-container">
-                    <button color="primary" mat-fab extended>
+                    <button color="primary" mat-flat-button (click)="goBack()">
                       <mat-icon>arrow_back_ios</mat-icon>
                       Back
                     </button>
@@ -22,6 +22,9 @@
             <input matInput [(ngModel)]="searchQuery" placeholder="Type to search">
         <button mat-icon-button matSuffix (click)="clearSearch()">
             <mat-icon>clear</mat-icon>
+        </button>
+        <button mat-icon-button matSuffix (click)="searchDocuments()">
+            <mat-icon>search</mat-icon>
         </button>
     </mat-form-field>
 </div>

@@ -39,6 +39,7 @@ services:
       APP_PORT: ${APP_PORT}
       APP_HOST: ${APP_HOST}
       OLLAMA_HOST: ${OLLAMA_HOST}
+      SQLLITE_DATABASE_DIR: ${SQLLITE_DATABASE_DIR}
     deploy:
       resources:
         limits:

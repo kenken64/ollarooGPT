@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-documents',
@@ -6,8 +7,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
   styleUrl: './documents.component.css'
 })
 export class DocumentsComponent implements OnInit, OnDestroy{
-  constructor(){
-    
+  constructor(private router:Router){
+
   }
   
   ngOnInit(): void {
@@ -23,7 +24,12 @@ export class DocumentsComponent implements OnInit, OnDestroy{
     this.searchQuery = '';
   }
 
-  goBack(){
+  searchDocuments(){
 
+  }
+
+  goBack(){
+    console.log("go back !")
+    this.router.navigate(['chat']);
   }
 }

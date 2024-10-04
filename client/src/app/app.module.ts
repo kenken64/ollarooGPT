@@ -16,6 +16,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -62,6 +63,7 @@ import { AlignDocsButtonPipe } from './shared/aligndocs.btn.pipe';
         MatProgressSpinnerModule,
         MatBottomSheetModule,
         MatTooltipModule,
+        MatProgressBarModule,
         MatToolbarModule],
     providers: [
         provideHttpClient(withInterceptors([authInterceptor])),

@@ -65,7 +65,11 @@ export const chatOllama =  async (req, res) => {
         const total_duration_seconds = response.total_duration / 1e9;
         console.log("Eval duration in secs > " + eval_duration_seconds);
         console.log("Total duration in secs > " + total_duration_seconds);
-        res.status(200).json(response.message.content)
+        res.status(200).json({
+          eval_count: response.eval_count,
+          eval_duration_seconds: eval_duration_seconds,
+          total_duration_seconds: total_duration_seconds,
+          content: response.message.content})
     }catch(error){
         console.error(error);
         res.status(500).json({ error: 'Failed to process the chat request' });

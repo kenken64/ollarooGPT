@@ -1,30 +1,32 @@
+<mat-progress-bar *ngIf="messageSent" mode="indeterminate"></mat-progress-bar>
+        
 <div class="chat-container">
     <div class="chat-header">
         <div class="circle-image" [matTooltip]="userEmail!"></div>
         <h1 class="app-title">Ollaroo</h1>
-        <button mat-button color="primary" matTooltip="Navigate to documents" class="togoDocs-button" type="button" (click)="gotoDocuments()" [ngStyle]="screenAvailWidth | alignDocsButton">
+        <button mat-button color="primary" matTooltip="Navigate to documents" [disabled]="messageSent" class="togoDocs-button" type="button" (click)="gotoDocuments()" [ngStyle]="screenAvailWidth | alignDocsButton">
             <mat-icon class="file-icon">book</mat-icon>
         </button>
-        <button type="button" mat-button matTooltip="Upload PDF" class="pdffileupload-button" [ngStyle]="screenAvailWidth | alignUploadButton" color="primary" 
+        <button type="button" mat-button matTooltip="Upload PDF" class="pdffileupload-button" [disabled]="messageSent" [ngStyle]="screenAvailWidth | alignUploadButton" color="primary" 
             (click)="pdfUpload.click()" [disabled]="messageSent">
             <mat-icon class="file-icon">description</mat-icon>
         </button>
         <input hidden type="file" class="file-input" accept="application/pdf" (change)="onPDFFileSelected($event)" #pdfUpload>
-        <button mat-button color="primary" matTooltip="Donate" class="musicsend-button" type="button" (click)="donate()" [ngStyle]="screenAvailWidth | alignSendMusicButton">
+        <button mat-button color="primary" matTooltip="Donate" class="musicsend-button" type="button" [disabled]="messageSent" (click)="donate()" [ngStyle]="screenAvailWidth | alignSendMusicButton">
             <mat-icon class="file-icon">currency_bitcoin</mat-icon>
         </button>
-        <button mat-button color="primary" matTooltip="Logout" class="logout-button" type="button" (click)="logout()" [ngStyle]="screenAvailWidth | alignLogoutButton">
+        <button mat-button color="primary" matTooltip="Logout" class="logout-button" type="button" [disabled]="messageSent" (click)="logout()" [ngStyle]="screenAvailWidth | alignLogoutButton">
             <mat-icon class="file-icon">logout</mat-icon>
         </button>
     </div>
     
-    <div class="center">
+    <!-- <div class="center">
         <mat-spinner *ngIf="messageSent" mode="indeterminate" color="warn"></mat-spinner>
-    </div>
+    </div> -->
 
     <div #userMessages class="scrollable-y">
         <div  class="chat-messages" *ngFor="let message of messages">
-            <span>{{ message.sender }} - {{messageNow | date:'medium'}}</span>
+            <span>{{ message.sender }} - {{messageNow | date:'medium'}} - {{message.elapsed}}</span>
                 <div *ngIf="message.type==='msg'" class="ollama-wrap" matTooltip="{{ message.text }}" [innerHtml]=message.text></div>
                 <br>
                 <img *ngIf="message.type==='img'" [src]="message.text" (click)="openImage(message.text)" width="200" height="200">
@@ -54,17 +56,15 @@
             <mat-form-field class="example-full-width" appearance="fill">
                 <input matInput id="messageInput" formControlName="text" autocomplete="off" placeholder="Type a message here..">
                 <mat-error *ngIf="messageForm?.get('text')?.invalid">Message is required</mat-error>
-            </mat-form-field>
-            <div class="buttons-grid">
-                <button mat-button color="primary" matTooltip="Send message" class="send-button" (click)="openSendMsgBottomSheet()" [disabled]="messageSent">
+                <button mat-button color="primary" matSuffix matTooltip="Send message" class="send-button" (click)="openSendMsgBottomSheet()" [disabled]="messageSent">
                     <mat-icon>send</mat-icon>
                 </button>
-                <button type="button" mat-button matTooltip="Upload image" class="fileupload-button" color="primary" 
+                <button type="button" mat-button matSuffix matTooltip="Upload image" class="fileupload-button" color="primary" 
                     (click)="fileUpload.click()" [disabled]="messageSent" >
                     <mat-icon>file_copy</mat-icon>
                 </button>
                 <input hidden type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload accept="image/png, image/jpeg">
-            </div>       
+            </mat-form-field>
         </form>
     </div>
 

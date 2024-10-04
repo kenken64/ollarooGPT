@@ -297,9 +297,14 @@ export class ChatComponent implements OnInit, OnDestroy{
       this.addPromptMessagetoDexie(text);
       this.messageSent = true;
       this.ollamaService.chatwithOllama(text).then(async (response) => {
-        this.responseMessage = await markdownToHtml(response);
+        this.responseMessage = await markdownToHtml(response.content);
         this.messages.push({text: this.responseMessage, 
-            sender: this.chatOwnerUsername, timestamp: new Date(), type:'msg'});
+            sender: this.chatOwnerUsername, 
+            timestamp: new Date(), 
+            type:'msg',
+            elapsed: `Total token: ${response.eval_count} 
+                - Evail duration: ${response.eval_duration_seconds} sec - Total eval duration: ${response.total_duration_seconds} sec`,
+            });
         this.messageSent = false;
       });
 

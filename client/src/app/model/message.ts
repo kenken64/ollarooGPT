@@ -6,4 +6,5 @@ export interface Message {
     lyrics?: string;
     title?: string;
     image_url?: string;
+    elapsed?: string;
 }

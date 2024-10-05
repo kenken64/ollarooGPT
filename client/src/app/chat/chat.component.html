@@ -20,10 +20,6 @@
         </button>
     </div>
     
-    <!-- <div class="center">
-        <mat-spinner *ngIf="messageSent" mode="indeterminate" color="warn"></mat-spinner>
-    </div> -->
-
     <div #userMessages class="scrollable-y">
         <div  class="chat-messages" *ngFor="let message of messages">
             <span>{{ message.sender }} - {{messageNow | date:'medium'}} - {{message.elapsed}}</span>

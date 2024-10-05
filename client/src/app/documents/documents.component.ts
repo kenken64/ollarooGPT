@@ -29,7 +29,6 @@ export class DocumentsComponent implements OnInit, OnDestroy{
   }
 
   goBack(){
-    console.log("go back !")
     this.router.navigate(['chat']);
   }
 }

@@ -38,4 +38,4 @@ RUN npx prisma generate
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+USER non-root CMD ["npm", "run", "start"]

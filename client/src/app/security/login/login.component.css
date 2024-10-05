@@ -21,3 +21,44 @@ mat-card-content {
         padding: 2rem 3rem;
     }
 }
+
+.full-card {
+    width: 100%;           /* Make the card take up the full width */
+    height: 100%;          /* Make the card take up the full height of its container */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .full-card-content {
+    padding: 0;            /* Remove any extra padding inside the card */
+    height: 100%;
+    display: flex;
+  }
+  
+  /* Use flexbox to align left and right sides */
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .left-side {
+    flex: 1;               /* Allow the left side to grow */
+    padding: 20px;         /* Optional: adjust padding for aesthetics */
+  }
+  
+  .right-side {
+    flex: 1;               /* Allow the right side to grow */
+    height: 100%;          /* Ensure the right side takes full height */
+    text-align: right;     /* Align content to the right */
+  }
+  
+  /* Make the image responsive and fill the right-side container */
+  .image-right {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;    /* Ensure the image fits the container without being cropped */
+  }

@@ -303,7 +303,7 @@ export class ChatComponent implements OnInit, OnDestroy{
             timestamp: new Date(), 
             type:'msg',
             elapsed: `Total token: ${response.eval_count} 
-                - Evail duration: ${response.eval_duration_seconds} sec - Total eval duration: ${response.total_duration_seconds} sec`,
+                - Eval duration: ${response.eval_duration_seconds} sec - Total eval duration: ${response.total_duration_seconds} sec`,
             });
         this.messageSent = false;
       });

@@ -13,7 +13,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              count: 2
               capabilities: [gpu]
     ports:
        - "11434:11434"

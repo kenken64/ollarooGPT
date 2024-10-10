@@ -4,6 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LoadingBar from 'react-top-loading-bar';
 import { Tooltip } from 'react-tooltip'
+import { delay } from 'lodash';
 
 type Fruit = {
     _id: string;
@@ -12,6 +13,7 @@ type Fruit = {
 };
 
 export default function ItemList() {
+
     const [items, setItems] = useState<Fruit[]>([]);
     const [newItem, setNewItem] = useState('');
     const [isEditing, setIsEditing] = useState<number | null>(null); // Track the index of the item being edited
@@ -79,6 +81,13 @@ export default function ItemList() {
         }
     };
 
+    /**
+     * This function can be used to handle file input in applications where multiple items can 
+     * have associated files (e.g., uploading images for different products in an inventory system).
+     * Each item can be uniquely identified by itemId, allowing individual files to be selected and managed without overwriting others.
+     * @param e 
+     * @param itemId 
+     */
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, itemId: string) => {
         const files = e.target.files;
         if (files && files.length > 0) {
@@ -86,11 +95,15 @@ export default function ItemList() {
             ...prevSelectedFiles,
             [itemId]: files[0],
           }));
+          delay(() => {
+            console.log('delayed by 2 seconds');
+          }, 3000);
         }
     };
 
     // Handle the custom button click to open file dialog for a specific item
     const handleButtonClick = (itemId: string) => {
+        console.log("handleButtonClick")
         fileInputRefs.current[itemId]?.click();
     };
 
@@ -144,6 +157,7 @@ export default function ItemList() {
         }
     };
     
+
     const handleSearch = async () => {
         try {
           const response = await fetch(`/api/fruits/search?q=${searchQuery}`);

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import LoadingBar from 'react-top-loading-bar';
 
 type Fruit = {
     _id: string;
@@ -18,7 +19,9 @@ export default function ItemList() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>({});
     const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
-    
+    const loadingBarRef = useRef<any>(null);
+    const [progress, setProgress] = useState(0);
+
     // Fetch all items initially
     useEffect(() => {
         fetchItems();
@@ -100,26 +103,33 @@ export default function ItemList() {
         const formData = new FormData();
         formData.append('file', selectedFile);
         formData.append('itemId', itemId);
-
+        
         try {
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
-        });
+            // Start loading bar
+            setProgress(0);
+            loadingBarRef.current?.continuousStart(0);
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
 
-        if (response.ok) {
-            console.log('File uploaded successfully');
-            // Show success toast message
-            toast.success(`File uploaded successfully for item: ${itemId}`);
-            // Clear the selected file after successful upload
-            setSelectedFiles((prevSelectedFiles) => ({
-                ...prevSelectedFiles,
-                [itemId]: null,
-            }));
-    
-            // Clear the file input value
-            if (fileInputRefs.current[itemId]) {
-                fileInputRefs.current[itemId]!.value = '';
+            if (response.ok) {
+                console.log('File uploaded successfully');
+                // Show success toast message
+                toast.success(`File uploaded successfully for item: ${itemId}`);
+                // Clear the selected file after successful upload
+                setSelectedFiles((prevSelectedFiles) => ({
+                    ...prevSelectedFiles,
+                    [itemId]: null,
+                }));
+        
+                // Clear the file input value
+                if (fileInputRefs.current[itemId]) {
+                    fileInputRefs.current[itemId]!.value = '';
+                
+                // Complete the loading bar
+                setProgress(100);
+                loadingBarRef.current?.complete();
             }
         } else {
             console.error('Failed to upload file');
@@ -219,6 +229,7 @@ export default function ItemList() {
     return (
         
         <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
+            <LoadingBar color="#f11946" ref={loadingBarRef} />
             <ToastContainer />
             <h1 className="text-2xl font-bold text-center mb-6">Fruit List</h1>
             <div className="mt-6 flex">

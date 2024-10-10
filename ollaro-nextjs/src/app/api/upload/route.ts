@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { IncomingForm, File } from "formidable";
+import { promises as fs } from "fs";
 
 const s3 = new S3Client({
   region: 'sgp1', // Replace with your DigitalOcean region
@@ -29,7 +31,6 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
   
     const decoder = new TextDecoder();
     let done = false;
-    let formDataString = '';
     const chunks: Uint8Array[] = [];
   
     while (!done) {
@@ -90,18 +91,31 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
         if (!itemId) {
             return NextResponse.json({ success: false, message: 'Item ID is required' }, { status: 400 });
         }
+
+        console.log(">>>>> " + fileName);
+        let filenamesExt = fileName.split(".");
+        console.log(file);
+
         // Define the file key and bucket
-        const key = `uploads/${itemId}-${fileName}-${Date.now()}.jpg`; // Customize key as needed
+        const key = `uploads/${itemId}-${filenamesExt[0]}-${Date.now()}.${filenamesExt[1]}`; // Customize key as needed
         const bucket = process.env.DO_SPACES_BUCKET || '';
+        let filenameExtMimeType = filenamesExt[1];
+        let mimeType = `image/${filenameExtMimeType}`;
+        console.log(mimeType);
         // Upload the file to DigitalOcean Spaces
         const uploadParams = {
             Bucket: bucket,
             Key: key,
             Body: file,
-            ContentType: 'image/jpeg', // Adjust Content-Type as needed (e.g., 'image/png')
+            ContentType: mimeType, // Adjust Content-Type as needed (e.g., 'image/png')
+            ACL: 'public-read',
         };
   
-        await s3.send(new PutObjectCommand(uploadParams));
+        let uploadResponse = await s3.send(new PutObjectCommand(uploadParams));
+        // Construct the URL for accessing the file
+        const fileUrl = `https://${bucket}.sgp1.digitaloceanspaces.com/upload/${key}`;
+        console.log(fileUrl);
+        console.log(uploadResponse);
         console.log(itemId);
         return NextResponse.json({ success: true, message: 'File uploaded successfully' });
     } catch (error) {

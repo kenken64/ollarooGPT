@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LoadingBar from 'react-top-loading-bar';
+import { Tooltip } from 'react-tooltip'
 
 type Fruit = {
     _id: string;
@@ -131,6 +132,7 @@ export default function ItemList() {
                 // Complete the loading bar
                 setProgress(100);
                 loadingBarRef.current?.complete();
+                fetchItems();
             }
         } else {
             console.error('Failed to upload file');
@@ -170,6 +172,7 @@ export default function ItemList() {
         if (response.ok) {
             // Remove the item from the local state if the deletion was successful
             setItems((prevItems) => prevItems.filter((_, i) => i !== index));
+            fetchItems();
         } else {
             console.error('Failed to delete item');
         }
@@ -204,6 +207,7 @@ export default function ItemList() {
                     updatedItems[index] = data; // Update the item in the local state with the updated item from the response
                     setItems(updatedItems);
                     setIsEditing(null); // Exit edit mode
+                    fetchItems();
                 } else {
                     console.error('Failed to update item');
                 }
@@ -225,6 +229,10 @@ export default function ItemList() {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
         }
+    };
+
+    const truncateText = (text: string, maxLength: number) => {
+        return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
     };
 
     return (
@@ -304,7 +312,9 @@ export default function ItemList() {
                                     <input
                                         type="file"
                                         accept="image/*" // Accept only image files
-                                        ref={(el) => (fileInputRefs.current[item._id] = el)}
+                                        ref={(el) => {
+                                            fileInputRefs.current[item._id] = el;
+                                        }}
                                         onChange={(e) => handleFileChange(e, item._id)}
                                         style={{ display: 'none' }}
                                         />
@@ -312,8 +322,9 @@ export default function ItemList() {
                                     <button
                                         onClick={() => handleButtonClick(item._id)}
                                         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                                        id="clickable"
                                     >
-                                        {selectedFiles[item._id]?.name ? selectedFiles[item._id]?.name : '...'}
+                                        {selectedFiles[item._id]?.name ? truncateText(selectedFiles[item._id]!.name, 10) : '...'}
                                     </button>
                                     <button
                                         onClick={() => handleUpload(item._id)}
@@ -324,6 +335,9 @@ export default function ItemList() {
                                     >
                                         Upload
                                     </button>
+                                    <Tooltip anchorSelect="#clickable" clickable>
+                                        <button>{selectedFiles[item._id]?.name ? selectedFiles[item._id]!.name : '...'}</button>
+                                    </Tooltip>
                                 </div>
                             </>
                         )}

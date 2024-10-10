@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, PutObjectAclCommand, ObjectCannedACL } from '@aws-sdk/client-s3';
 import { IncomingForm, File } from "formidable";
 import { promises as fs } from "fs";
+import { Readable } from "stream";
+import { IncomingMessage } from 'http';
+import dbConnect from '@/app/lib/dbConnect';
+import mongoose from 'mongoose';
+import Fruit from '@/app/models/Fruit';
 
 const s3 = new S3Client({
   region: 'sgp1', // Replace with your DigitalOcean region
@@ -12,79 +17,84 @@ const s3 = new S3Client({
   },
 });
 
-// Helper function to parse multipart/form-data without formidable
-async function parseFormData(req: NextRequest): Promise<{ fields: Record<string, string>; file: Buffer | null; fileName: string | null }> {
-    const contentType = req.headers.get('content-type') || '';
-    if (!contentType.includes('multipart/form-data')) {
-      throw new Error('Invalid content-type, expected multipart/form-data');
-    }
+// Define a custom type to extend Readable to mimic IncomingMessage
+interface NodeRequestReadable extends Readable {
+    headers: Record<string, string>;
+    method?: string;
+    url?: string;
+    aborted?: boolean;
+  }
   
-    const boundary = contentType.split('boundary=')[1];
-    if (!boundary) {
-      throw new Error('No boundary found in content-type');
-    }
+  // Convert NextRequest to a mock Node.js IncomingMessage
+  function nextRequestToNodeRequest(req: NextRequest): NodeRequestReadable {
+    const { body } = req;
+    const headers: Record<string, string> = {};
   
-    const reader = req.body?.getReader();
-    if (!reader) {
-      throw new Error('No readable stream found in request');
-    }
+    // Copy all headers from NextRequest to a new headers object
+    req.headers.forEach((value, key) => {
+      headers[key.toLowerCase()] = value;
+    });
   
-    const decoder = new TextDecoder();
-    let done = false;
-    const chunks: Uint8Array[] = [];
+    // Create a new readable stream and attach necessary headers and properties
+    const readable = new Readable() as NodeRequestReadable;
+    readable._read = () => {}; // _read is required but you can noop it
   
-    while (!done) {
-      const { value, done: readerDone } = await reader.read();
-      if (value) {
-        chunks.push(value);
-      }
-      done = readerDone;
-    }
+    readable.headers = headers; // Attach headers to mimic IncomingMessage
+    readable.method = req.method || 'POST'; // Attach method
+    readable.url = req.url || ''; // Attach url
+    readable.aborted = false; // Set aborted to false initially
   
-    const fullBuffer = Buffer.concat(chunks);
-    const text = decoder.decode(fullBuffer);
-  
-    // Manually parse the form data based on the boundary
-    const parts = text.split(`--${boundary}`);
-    const fields: Record<string, string> = {};
-    let fileBuffer: Buffer | null = null;
-    let fileName: string | null = null;
-  
-    for (const part of parts) {
-      if (part === '--' || part.trim() === '') continue;
-  
-      const [header, body] = part.split('\r\n\r\n');
-      if (header && body) {
-        if (header.includes('Content-Disposition: form-data;')) {
-          const nameMatch = header.match(/name="([^"]+)"/);
-          const filenameMatch = header.match(/filename="([^"]+)"/);
-  
-          if (filenameMatch && nameMatch) {
-            fileName = filenameMatch[1];
-            const contentTypeMatch = header.match(/Content-Type: ([^\s]+)/);
-            if (contentTypeMatch) {
-              const bodyIndex = text.indexOf(body);
-              const start = bodyIndex + 4;
-              const end = text.indexOf(`--${boundary}`, start);
-              fileBuffer = fullBuffer.slice(start, end);
-            }
-          } else if (nameMatch) {
-            fields[nameMatch[1]] = body.trim();
-          }
+    if (body) {
+      body.getReader().read().then(({ done, value }) => {
+        if (!done && value) {
+          readable.push(Buffer.from(value));
         }
-      }
+        readable.push(null); // End the stream
+      });
     }
   
-    return { fields, file: fileBuffer, fileName };
+    return readable;
+  }
+  
+  // Utility function to parse form data using Formidable
+async function parseForm(req: NextRequest): Promise<{ fields: Record<string, any>; files: Record<string, File | File[]> }> {
+    const nodeReq = nextRequestToNodeRequest(req); // Convert the request to NodeRequestReadable
+  
+    return new Promise((resolve, reject) => {
+      const form = new IncomingForm();
+  
+      // Using type assertion to make TypeScript recognize nodeReq as IncomingMessage
+      form.parse(nodeReq as IncomingMessage, (err, fields, files) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ fields, files });
+        }
+      });
+    });
   }
 
   export async function POST(req: NextRequest) {
     try {
+        await dbConnect();
         // Parse the incoming form data manually
-        const { fields, file, fileName } = await parseFormData(req);
+        // const { fields, file, fileName } = await parseFormData(req);
+        const { fields, files } = await parseForm(req);
+        // if (!fileName || !file) {
+        //     return NextResponse.json({ success: false, message: 'File not found in request' }, { status: 400 });
+        // }
+        const uploadedFile = files.file;
+        const uploadedSingleFile = Array.isArray(uploadedFile) ? uploadedFile[0] : uploadedFile;
+        console.log(uploadedSingleFile)
+        if (Array.isArray(uploadedSingleFile)) {
+            // Handle multiple files (if the form allows multiple uploads)
+            console.error("Only single file upload is supported.");
+            return NextResponse.json({ error: "Only single file upload is supported" }, { status: 400 });
+        }
 
-        if (!fileName || !file) {
-            return NextResponse.json({ success: false, message: 'File not found in request' }, { status: 400 });
+        if (!uploadedSingleFile) {
+            console.error("No file found in the request");
+            return NextResponse.json({ error: "No file found in the request" }, { status: 400 });
         }
 
         const itemId = fields.itemId;
@@ -92,32 +102,50 @@ async function parseFormData(req: NextRequest): Promise<{ fields: Record<string,
             return NextResponse.json({ success: false, message: 'Item ID is required' }, { status: 400 });
         }
 
-        console.log(">>>>> " + fileName);
-        let filenamesExt = fileName.split(".");
-        console.log(file);
+        // TypeScript now knows that uploadedFile is a File object
+        const filePath = uploadedSingleFile.filepath;
 
+        // Read file data to store or process
+        const data = await fs.readFile(filePath);
+        console.log(uploadedFile);
+        let filenamesExt = uploadedSingleFile.originalFilename?.split(".");
+        
         // Define the file key and bucket
-        const key = `uploads/${itemId}-${filenamesExt[0]}-${Date.now()}.${filenamesExt[1]}`; // Customize key as needed
+        const key = `uploads/${itemId}-${filenamesExt![0]}-${Date.now()}.${filenamesExt![1]}`; // Customize key as needed
         const bucket = process.env.DO_SPACES_BUCKET || '';
-        let filenameExtMimeType = filenamesExt[1];
+        let filenameExtMimeType = filenamesExt![1];
         let mimeType = `image/${filenameExtMimeType}`;
         console.log(mimeType);
         // Upload the file to DigitalOcean Spaces
         const uploadParams = {
             Bucket: bucket,
             Key: key,
-            Body: file,
+            Body: data,
             ContentType: mimeType, // Adjust Content-Type as needed (e.g., 'image/png')
-            ACL: 'public-read',
         };
   
-        let uploadResponse = await s3.send(new PutObjectCommand(uploadParams));
+        await s3.send(new PutObjectCommand(uploadParams));
+
+        // Set the object ACL to public-read
+        const aclParams = {
+            Bucket: bucket,
+            Key: key,
+            ACL: 'public-read' as ObjectCannedACL,
+        };
+        await s3.send(new PutObjectAclCommand(aclParams));
+        console.log(key)
         // Construct the URL for accessing the file
-        const fileUrl = `https://${bucket}.sgp1.digitaloceanspaces.com/upload/${key}`;
-        console.log(fileUrl);
-        console.log(uploadResponse);
+        const fileUrl = `https://${bucket}.sgp1.cdn.digitaloceanspaces.com/${key}`;
+        console.log(fileUrl)
+        const _itemId= itemId;
         console.log(itemId);
-        return NextResponse.json({ success: true, message: 'File uploaded successfully' });
+        const existingObjectId = new mongoose.Types.ObjectId(_itemId[0]);
+        const fruit = await Fruit.findById(existingObjectId);
+        console.log(fruit)
+        await Fruit.findByIdAndUpdate(existingObjectId, { name: fruit?.name , url: fileUrl }, 
+            { new: false, runValidators: false });
+
+        return NextResponse.json({ success: true, message: fileUrl }, { status: 200 });
     } catch (error) {
       console.error('Error uploading to S3:', error);
       return NextResponse.json({ success: false, message: 'Error uploading file' }, { status: 500 });

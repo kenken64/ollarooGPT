@@ -7,6 +7,7 @@ import LoadingBar from 'react-top-loading-bar';
 type Fruit = {
     _id: string;
     name: string;
+    url: string;
 };
 
 export default function ItemList() {
@@ -20,7 +21,7 @@ export default function ItemList() {
     const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>({});
     const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
     const loadingBarRef = useRef<any>(null);
-    const [progress, setProgress] = useState(0);
+    const [progress, setProgress] = useState<number>(0);
 
     // Fetch all items initially
     useEffect(() => {
@@ -281,6 +282,11 @@ export default function ItemList() {
                             </>
                         ) : (
                             <>
+                                <img
+                                    src={item.url || '/placeholder.png'} // Show placeholder if imageUrl is undefined
+                                    alt={item.name}
+                                    className="w-12 h-12 object-cover rounded-full mr-4"
+                                />
                                 <span className="text-gray-700 font-medium">{item.name}</span>
                                 <div className="flex space-x-2">
                                     <button

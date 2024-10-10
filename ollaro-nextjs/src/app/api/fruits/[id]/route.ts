@@ -22,8 +22,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     console.log(body.name);
     const fruit = await Fruit.findById(existingObjectId);
     console.log(fruit)
-    const updatedFruit = await Fruit.findByIdAndUpdate(existingObjectId, { name: body.name }, 
-            { new: true, runValidators: true });
+    const updatedFruit = await Fruit.findByIdAndUpdate(existingObjectId, { name: body.name, url: body.url }, 
+            { new: false, runValidators: true });
 
     if (!updatedFruit) {
       console.log("////")

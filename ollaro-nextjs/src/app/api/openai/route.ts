@@ -14,40 +14,46 @@ const openai = new OpenAI({
 });
 
 export async function POST(request: NextRequest) {
-  //console.log(request);
-  //const body = request.body;
-  const body = await request.json();
-  console.log(body);
-  console.log(">>>>" + body.messages.content);
-  const messages = (body?.messages || []);
-  const model = (body?.model || DEFAULT_OPENAI_MODEL) as OpenAIModel;
-  const promptMessage = {
-    role: "system",
-    content: "You are ChatGPT. Respond to the user like you normally would.",
-  };
-  const initialMessages = messages.splice(
-    0,
-    3
-  );
-  const latestMessages = messages
-    .slice(-5)
-    .map((message: { role: any; content: any; }) => ({
-      role: message.role,
-      content: message.content,
-    }));
+  try{
+    const body = await request.json();
+    console.log(body);
+    console.log(">>>>" + body.messages.content);
+    const messages = (body?.messages || []);
+    const model = (body?.model || DEFAULT_OPENAI_MODEL) as OpenAIModel;
+    const promptMessage = {
+      role: "system",
+      content: "You are ChatGPT. Respond to the user like you normally would.",
+    };
+    const initialMessages = messages.splice(
+      0,
+      3
+    );
+    const latestMessages = messages
+      .slice(-5)
+      .map((message: { role: any; content: any; }) => ({
+        role: message.role,
+        content: message.content,
+      }));
 
-  console.log(promptMessage)
-  console.log(initialMessages)
-  console.log(latestMessages)
-  console.log(model)
-  const completion = await openai.chat.completions.create({
-    model: model.id,
-    temperature: 0.5,
-    messages: [promptMessage, ...initialMessages, ...latestMessages],
-  });
-  console.log(completion);
-  
-  return NextResponse.json({ message: 'OpenAPI!' })
+    console.log(promptMessage)
+    console.log(initialMessages)
+    console.log(latestMessages)
+    console.log(model)
+    const completion = await openai.chat.completions.create({
+      model: model.id,
+      temperature: 0.5,
+      messages: [promptMessage, ...initialMessages, ...latestMessages],
+    });
+    
+    const responseMessage = completion.choices[0].message?.content?.trim();
+    console.log(responseMessage)
+    return NextResponse.json({ message:  responseMessage}, { status: 200 })
+  }catch (error) {
+    console.error(error);
+    NextResponse.json({
+      error: "An error occurred during ping to OpenAI. Please try again.",
+    }, { status: 500 });
+  }
 }
 
 /*

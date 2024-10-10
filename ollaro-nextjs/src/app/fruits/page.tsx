@@ -1,5 +1,7 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 type Fruit = {
     _id: string;
@@ -14,26 +16,35 @@ export default function ItemList() {
     const [currentPage, setCurrentPage] = useState(1); // Current page
     const itemsPerPage = 5; // Items to show per page
     const [searchQuery, setSearchQuery] = useState('');
-
-    // Fetch items from the database
+    const [selectedFiles, setSelectedFiles] = useState<Record<string, File | null>>({});
+    const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+    
+    // Fetch all items initially
     useEffect(() => {
-        const fetchItems = async () => {
-            try {
-                const response = await fetch('/api/fruits');
-                if (response.ok) {
-                    const { data } = await response.json();
-                    data.sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
-                    setItems(data)
-                } else {
-                    console.error('Failed to fetch items');
-                }
-            } catch (error) {
-                console.error('An error occurred:', error);
-            }
-        };
-
         fetchItems();
     }, []);
+
+    // Function to fetch all items
+    const fetchItems = async () => {
+        try {
+        const response = await fetch('/api/fruits');
+        if (response.ok) {
+            const { data } = await response.json();
+            data.sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
+            setItems(data);
+        } else {
+            console.error('Failed to fetch items');
+        }
+        } catch (error) {
+        console.error('An error occurred:', error);
+        }
+    };
+
+    // Function to clear the search box
+    const clearSearch = () => {
+        setSearchQuery('');
+        fetchItems(); // Reset the items list to its original state
+    };
 
     // Function to add a new item
     const addItem = async () => {
@@ -54,13 +65,72 @@ export default function ItemList() {
                     setNewItem('');
                 } else {
                     console.error('Failed to add item');
+                    toast.error('Failed to add item');
                 }
             } catch (error) {
                 console.error('An error occurred:', error);
+                toast.error('An error occurred');
             }
         }
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, itemId: string) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+          setSelectedFiles((prevSelectedFiles) => ({
+            ...prevSelectedFiles,
+            [itemId]: files[0],
+          }));
+        }
+    };
+
+    // Handle the custom button click to open file dialog for a specific item
+    const handleButtonClick = (itemId: string) => {
+        fileInputRefs.current[itemId]?.click();
+    };
+
+    // Handle file upload
+    const handleUpload = async (itemId: string) => {
+        const selectedFile = selectedFiles[itemId];
+        if (!selectedFile) {
+            console.error('No file selected for item:', itemId);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('itemId', itemId);
+
+        try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.ok) {
+            console.log('File uploaded successfully');
+            // Show success toast message
+            toast.success(`File uploaded successfully for item: ${itemId}`);
+            // Clear the selected file after successful upload
+            setSelectedFiles((prevSelectedFiles) => ({
+                ...prevSelectedFiles,
+                [itemId]: null,
+            }));
+    
+            // Clear the file input value
+            if (fileInputRefs.current[itemId]) {
+                fileInputRefs.current[itemId]!.value = '';
+            }
+        } else {
+            console.error('Failed to upload file');
+            toast.error(`Failed to upload file for item: ${itemId}`);
+        }
+        } catch (error) {
+            console.error('An error occurred while uploading the file:', error);
+            toast.error(`An error occurred while uploading the file for item: ${itemId}`);
+        }
+    };
+    
     const handleSearch = async () => {
         try {
           const response = await fetch(`/api/fruits/search?q=${searchQuery}`);
@@ -93,7 +163,7 @@ export default function ItemList() {
             console.error('Failed to delete item');
         }
         } catch (error) {
-        console.error('An error occurred:', error);
+            console.error('An error occurred:', error);
         }
     };
 
@@ -118,7 +188,6 @@ export default function ItemList() {
                 });
 
                 if (response.ok) {
-                    console.log("ddddd")
                     const { data } = await response.json();
                     const updatedItems = [...items];
                     updatedItems[index] = data; // Update the item in the local state with the updated item from the response
@@ -149,7 +218,8 @@ export default function ItemList() {
 
     return (
         
-        <div className="max-w-lg mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
+        <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
+            <ToastContainer />
             <h1 className="text-2xl font-bold text-center mb-6">Fruit List</h1>
             <div className="mt-6 flex">
                 <input
@@ -161,9 +231,15 @@ export default function ItemList() {
                 />
                 <button
                     onClick={handleSearch}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg mr-4"
                 >
                     Search
+                </button>
+                <button
+                    onClick={clearSearch}
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+                    >
+                    Clear
                 </button>
             </div>
             <br>
@@ -207,6 +283,29 @@ export default function ItemList() {
                                         className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
                                     >
                                         Remove
+                                    </button>
+                                    <input
+                                        type="file"
+                                        accept="image/*" // Accept only image files
+                                        ref={(el) => (fileInputRefs.current[item._id] = el)}
+                                        onChange={(e) => handleFileChange(e, item._id)}
+                                        style={{ display: 'none' }}
+                                        />
+                                    {/* Custom Button to Open File Dialog */}
+                                    <button
+                                        onClick={() => handleButtonClick(item._id)}
+                                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                                    >
+                                        {selectedFiles[item._id]?.name ? selectedFiles[item._id]?.name : '...'}
+                                    </button>
+                                    <button
+                                        onClick={() => handleUpload(item._id)}
+                                        className={`bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg ${
+                                        !selectedFiles[item._id] ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
+                                        disabled={!selectedFiles[item._id]}
+                                    >
+                                        Upload
                                     </button>
                                 </div>
                             </>

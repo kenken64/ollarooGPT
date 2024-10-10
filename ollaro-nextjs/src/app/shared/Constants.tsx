@@ -9,8 +9,8 @@ export const DEFAULT_OPENAI_MODEL = {
 };
 
 export const GPT4_OPENAI_MODEL = {
-  name: "GPT-4",
-  id: "gpt-4",
+  name: "GPT-4o Mini",
+  id: "gpt-4o-mini",
   available: false,
 };
 

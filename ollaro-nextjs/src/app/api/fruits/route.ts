@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
     await dbConnect();
     try {
         const fruit = await Fruit.create(body);
+        console.log(fruit)
         return NextResponse.json({ success: true, data: fruit });
       } catch (error) {
         return NextResponse.json({ success: false }, { status: 500 });

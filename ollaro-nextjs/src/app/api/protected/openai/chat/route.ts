@@ -32,10 +32,6 @@ export async function POST(request: NextRequest) {
         content: message.content,
       }));
 
-    console.log(promptMessage)
-    console.log(initialMessages)
-    console.log(latestMessages)
-    console.log(model)
     const completion = await openai.chat.completions.create({
       model: model.id,
       temperature: 0.5,
@@ -43,7 +39,6 @@ export async function POST(request: NextRequest) {
     });
     
     const responseMessage = completion.choices[0].message?.content?.trim();
-    console.log(responseMessage)
     return NextResponse.json({ message:  responseMessage}, { status: 200 })
   }catch (error) {
     console.error(error);

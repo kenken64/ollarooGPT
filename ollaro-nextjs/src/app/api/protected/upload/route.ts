@@ -7,6 +7,7 @@ import { IncomingMessage } from 'http';
 import dbConnect from '@/app/lib/dbConnect';
 import mongoose from 'mongoose';
 import Fruit from '@/app/models/Fruit';
+import logger from '@/app/utils/logger';
 
 const s3 = new S3Client({
   region: 'sgp1', // Replace with your DigitalOcean region
@@ -85,7 +86,6 @@ async function parseForm(req: NextRequest): Promise<{ fields: Record<string, any
         // }
         const uploadedFile = files.file;
         const uploadedSingleFile = Array.isArray(uploadedFile) ? uploadedFile[0] : uploadedFile;
-        console.log(uploadedSingleFile)
         if (Array.isArray(uploadedSingleFile)) {
             // Handle multiple files (if the form allows multiple uploads)
             console.error("Only single file upload is supported.");
@@ -107,7 +107,7 @@ async function parseForm(req: NextRequest): Promise<{ fields: Record<string, any
 
         // Read file data to store or process
         const data = await fs.readFile(filePath);
-        console.log(uploadedFile);
+        logger.debug(uploadedFile);
         let filenamesExt = uploadedSingleFile.originalFilename?.split(".");
         
         // Define the file key and bucket
@@ -115,7 +115,7 @@ async function parseForm(req: NextRequest): Promise<{ fields: Record<string, any
         const bucket = process.env.DO_SPACES_BUCKET || '';
         let filenameExtMimeType = filenamesExt![1];
         let mimeType = `image/${filenameExtMimeType}`;
-        console.log(mimeType);
+        logger.debug(mimeType);
         // Upload the file to DigitalOcean Spaces
         const uploadParams = {
             Bucket: bucket,
@@ -133,15 +133,11 @@ async function parseForm(req: NextRequest): Promise<{ fields: Record<string, any
             ACL: 'public-read' as ObjectCannedACL,
         };
         await s3.send(new PutObjectAclCommand(aclParams));
-        console.log(key)
         // Construct the URL for accessing the file
         const fileUrl = `https://${bucket}.sgp1.cdn.digitaloceanspaces.com/${key}`;
-        console.log(fileUrl)
         const _itemId= itemId;
-        console.log(itemId);
         const existingObjectId = new mongoose.Types.ObjectId(_itemId[0]);
         const fruit = await Fruit.findById(existingObjectId);
-        console.log(fruit)
         await Fruit.findByIdAndUpdate(existingObjectId, { name: fruit?.name , url: fileUrl }, 
             { new: false, runValidators: false });
 

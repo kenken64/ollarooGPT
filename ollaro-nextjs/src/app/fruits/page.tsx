@@ -6,6 +6,8 @@ import LoadingBar from 'react-top-loading-bar';
 import { customFetch } from '../utils/customFetcher';
 import { Tooltip } from 'react-tooltip'
 import { delay } from 'lodash';
+import { useRouter } from 'next/navigation';
+import logger from '@/app/utils/logger';
 
 type Fruit = {
     _id: string;
@@ -26,6 +28,7 @@ export default function ItemList() {
     const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
     const loadingBarRef = useRef<any>(null);
     const [progress, setProgress] = useState<number>(0);
+    const router = useRouter();
 
     // Fetch all items initially
     useEffect(() => {
@@ -42,9 +45,11 @@ export default function ItemList() {
             setItems(data);
         } else {
             console.error('Failed to fetch items');
+            router.push('/auth/login');
         }
         } catch (error) {
-        console.error('An error occurred:', error);
+            console.error('An error occurred:', error);
+            router.push('/auth/login');
         }
     };
 
@@ -68,15 +73,14 @@ export default function ItemList() {
 
                 if (response!.ok) {
                     const { data } = await response!.json();
-                    console.log(data)
                     setItems((prevItems) => [...prevItems, data]);
                     setNewItem('');
                 } else {
-                    console.error('Failed to add item');
+                    logger.error('Failed to add item');
                     toast.error('Failed to add item');
                 }
             } catch (error) {
-                console.error('An error occurred:', error);
+                logger.error('An error occurred:', error);
                 toast.error('An error occurred');
             }
         }
@@ -97,14 +101,13 @@ export default function ItemList() {
             [itemId]: files[0],
           }));
           delay(() => {
-            console.log('delayed by 2 seconds');
+            logger.debug('delayed by 2 seconds');
           }, 3000);
         }
     };
 
     // Handle the custom button click to open file dialog for a specific item
     const handleButtonClick = (itemId: string) => {
-        console.log("handleButtonClick")
         fileInputRefs.current[itemId]?.click();
     };
 
@@ -130,7 +133,6 @@ export default function ItemList() {
             });
 
             if (response!.ok) {
-                console.log('File uploaded successfully');
                 // Show success toast message
                 toast.success(`File uploaded successfully for item: ${itemId}`);
                 // Clear the selected file after successful upload

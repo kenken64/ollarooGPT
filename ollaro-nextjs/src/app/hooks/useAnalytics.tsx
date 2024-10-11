@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import mixpanel from "mixpanel-browser";
 import useAppState from "./useAppState";
+import logger from '@/app/utils/logger';
 
 function useAnalytics() {
   const isDevelopment = process.env.APP_ENV === "development";
@@ -33,7 +34,7 @@ function useAnalytics() {
     mixpanel.track(eventName, allTags);
 
     if (isDevelopment) {
-      console.log("tracked", eventName, allTags);
+        logger.debug("tracked", eventName, allTags); 
     }
   }
 

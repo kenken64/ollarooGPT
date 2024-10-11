@@ -6,7 +6,6 @@ import Fruit from '@/app/models/Fruit';
 // Handle PATCH request to update a fruit by ID
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const { id } = params;
-  console.log(id);
   
   try {
     // Validate the ID format
@@ -17,19 +16,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     await dbConnect();
     
     const existingObjectId = new mongoose.Types.ObjectId(id);
-    console.log(existingObjectId);
     const body = await req.json();
-    console.log(body.name);
     const fruit = await Fruit.findById(existingObjectId);
-    console.log(fruit)
     const updatedFruit = await Fruit.findByIdAndUpdate(existingObjectId, { name: body.name, url: body.url }, 
             { new: false, runValidators: true });
 
     if (!updatedFruit) {
-      console.log("////")
       return NextResponse.json({ success: false, message: 'Fruit not found' }, { status: 404 });
     }
-    console.log(updatedFruit)
     return NextResponse.json({ success: true, data: updatedFruit });
   } catch (error) {
     console.error('Error updating fruit:', error);

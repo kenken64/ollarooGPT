@@ -39,6 +39,7 @@ export default function RootLayoutClient({ children }: { children: ReactNode }) 
             <>
               <a href="/auth/login" className="mr-4">Sign In</a>
               <a href="/auth/register" className="mr-4">Sign Up</a>
+              <a href="/enquiry" className="mr-4">General Enquiry</a>
             </>
           )}
         </nav>

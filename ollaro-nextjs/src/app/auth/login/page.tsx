@@ -46,11 +46,11 @@ export default function LoginPage() {
 
         const data = await response.json();
         if (!response.ok) {
-          setError(data.message);
+            setError(data.message);
         } else {
-          setToken(data.token);
-          localStorage.setItem('authToken', data.token);
-          console.log('Login successful:', data);
+            setToken(data.token);
+            localStorage.setItem('authToken', data.token);
+            router.push('/');
         }
       } catch (error) {
         setError('An error occurred while logging in');

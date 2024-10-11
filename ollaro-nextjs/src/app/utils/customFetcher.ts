@@ -1,11 +1,16 @@
-import { useRouter } from 'next/navigation';
-
-export const customFetch = async (url: string, options: RequestInit = {}) => {
+export const customFetch = async (url: string, 
+        options: RequestInit = {}) => {
   try {
-
+    
     // Get the token from localStorage
     const token = localStorage.getItem('authToken');
-
+    if(token === null){
+        // Create a 401-like response manually
+        return new Response(null, {
+            status: 401,
+            statusText: 'Unauthorized',
+        });
+    }
     // Include the token in the Authorization header if available
     const headers = new Headers(options.headers || {});
     if (token) {
@@ -23,9 +28,7 @@ export const customFetch = async (url: string, options: RequestInit = {}) => {
     
     if (response.status === 401) {
       // If 401 Unauthorized, redirect to login page
-      const router = useRouter();
-      router.push('/auth/login');
-      return;
+      return response;
     }
 
     // If successful, return the response

@@ -8,6 +8,7 @@ import useAutoResizeTextArea from "@/app/hooks/useAutoResizeTextArea";
 import Message from "./Message";
 import { DEFAULT_OPENAI_MODEL, GPT4_OPENAI_MODEL } from "@/app/shared/Constants";
 import { customFetch } from '../utils/customFetcher';
+import { useRouter } from "next/router";
 
 const Chat = (props: any) => {
   const { toggleComponentVisibility } = props;
@@ -60,7 +61,7 @@ const Chat = (props: any) => {
     // Clear the message & remove empty chat
     setMessage("");
     setShowEmptyChat(false);
-
+    
     try {
       const response = await customFetch(`/api/protected/openai/chat`, {
         method: "POST",

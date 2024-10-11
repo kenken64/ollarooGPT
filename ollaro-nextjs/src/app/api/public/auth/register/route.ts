@@ -8,8 +8,6 @@ export async function POST(req: NextRequest){
         await dbConnect();
         const body = await req.json();
         const { email, password } = body;
-        console.log(email)
-        console.log(password)
         if (!email || !password) {
             return NextResponse.json({ message: 'Please provide all required fields' }, { status: 400 });
           }

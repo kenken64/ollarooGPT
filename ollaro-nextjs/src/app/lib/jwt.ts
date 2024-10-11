@@ -6,10 +6,9 @@ export function generateToken(payload: object): string {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }); // Token expires in 1 hour
 }
 
-export function verifyToken(token: string): JwtPayload | null {
+export async function verifyToken(token: string): Promise<JwtPayload | null> {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-
+    const decoded = await jwt.verify(token, JWT_SECRET);
     // Ensure the returned value is of type JwtPayload, not string
     if (typeof decoded === 'object' && decoded !== null) {
       return decoded as JwtPayload;

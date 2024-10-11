@@ -4,7 +4,7 @@ import dbConnect from '@/app/lib/dbConnect';
 import User from '@/app/models/User';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'FSDFF#R@FDSDFF#R#@!DFSDDFSFy';
+const JWT_SECRET = process.env.JWT_SECRET || 'sdfdsfds3243hjsdfhd3##d';
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,7 +29,6 @@ export async function POST(req: NextRequest) {
 
     // Generate a JWT
     const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-
     return NextResponse.json({ message: 'Login successful', token }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ message: 'Internal server error', error }, { status: 500 });

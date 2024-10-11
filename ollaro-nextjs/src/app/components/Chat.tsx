@@ -7,6 +7,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import useAutoResizeTextArea from "@/app/hooks/useAutoResizeTextArea";
 import Message from "./Message";
 import { DEFAULT_OPENAI_MODEL, GPT4_OPENAI_MODEL } from "@/app/shared/Constants";
+import { customFetch } from '../utils/customFetcher';
 
 const Chat = (props: any) => {
   const { toggleComponentVisibility } = props;
@@ -61,7 +62,7 @@ const Chat = (props: any) => {
     setShowEmptyChat(false);
 
     try {
-      const response = await fetch(`/api/openai`, {
+      const response = await customFetch(`/api/protected/openai/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,8 +73,8 @@ const Chat = (props: any) => {
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response!.ok) {
+        const data = await response!.json();
 
         // Add the message to the conversation
         setConversation([
@@ -83,7 +84,7 @@ const Chat = (props: any) => {
         ]);
       } else {
         console.error(response);
-        setErrorMessage(response.statusText);
+        setErrorMessage(response!.statusText);
       }
 
       setIsLoading(false);

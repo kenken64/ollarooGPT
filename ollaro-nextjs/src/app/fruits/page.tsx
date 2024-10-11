@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LoadingBar from 'react-top-loading-bar';
+import { customFetch } from '../utils/customFetcher';
 
 type Fruit = {
     _id: string;
@@ -31,9 +32,9 @@ export default function ItemList() {
     // Function to fetch all items
     const fetchItems = async () => {
         try {
-        const response = await fetch('/api/fruits');
-        if (response.ok) {
-            const { data } = await response.json();
+        const response = await customFetch('/api/protected/fruits');
+        if (response!.ok) {
+            const { data } = await response!.json();
             data.sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
             setItems(data);
         } else {
@@ -54,7 +55,7 @@ export default function ItemList() {
     const addItem = async () => {
         if (newItem.trim()) {
             try {
-                const response = await fetch('/api/fruits', {
+                const response = await customFetch('/api/protected/fruits', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -62,8 +63,8 @@ export default function ItemList() {
                     body: JSON.stringify({ name: newItem }),
                 });
 
-                if (response.ok) {
-                    const { data } = await response.json();
+                if (response!.ok) {
+                    const { data } = await response!.json();
                     console.log(data)
                     setItems((prevItems) => [...prevItems, data]);
                     setNewItem('');
@@ -109,12 +110,12 @@ export default function ItemList() {
             // Start loading bar
             setProgress(0);
             loadingBarRef.current?.continuousStart(0);
-            const response = await fetch('/api/upload', {
+            const response = await customFetch('/api/protected/upload', {
                 method: 'POST',
                 body: formData
             });
 
-            if (response.ok) {
+            if (response!.ok) {
                 console.log('File uploaded successfully');
                 // Show success toast message
                 toast.success(`File uploaded successfully for item: ${itemId}`);
@@ -144,9 +145,9 @@ export default function ItemList() {
     
     const handleSearch = async () => {
         try {
-          const response = await fetch(`/api/fruits/search?q=${searchQuery}`);
-          if (response.ok) {
-            const { data } = await response.json();
+          const response = await customFetch(`/api/protected/fruits/search?q=${searchQuery}`);
+          if (response!.ok) {
+            const { data } = await response!.json();
             // Sort the search results alphabetically by name
             data.sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
             setItems(data);
@@ -163,11 +164,11 @@ export default function ItemList() {
         try {
         const fruitId = itemId;
     
-        const response = await fetch(`/api/fruits/${fruitId}`, {
+        const response = await customFetch(`/api/protected/fruits/${fruitId}`, {
             method: 'DELETE',
         });
     
-        if (response.ok) {
+        if (response!.ok) {
             // Remove the item from the local state if the deletion was successful
             setItems((prevItems) => prevItems.filter((_, i) => i !== index));
         } else {
@@ -190,7 +191,7 @@ export default function ItemList() {
             try {
                 const fruitId = itemId;
 
-                const response = await fetch(`/api/fruits/${fruitId}`, {
+                const response = await customFetch(`/api/protected/fruits/${fruitId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -198,8 +199,8 @@ export default function ItemList() {
                     body: JSON.stringify({ name: editValue }),
                 });
 
-                if (response.ok) {
-                    const { data } = await response.json();
+                if (response!.ok) {
+                    const { data } = await response!.json();
                     const updatedItems = [...items];
                     updatedItems[index] = data; // Update the item in the local state with the updated item from the response
                     setItems(updatedItems);

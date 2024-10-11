@@ -21,5 +21,5 @@ const storage = multer.diskStorage({
 });
 
 // Create the multer instance
-const upload = multer({ storage: storage, limits: { fileSize: 25000000 } });
+const upload = multer({ storage: storage, limits: { fileSize: 3000000 } });
 export default upload;

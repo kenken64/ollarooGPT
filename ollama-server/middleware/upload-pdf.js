@@ -19,6 +19,6 @@ const storagePDF = multer.diskStorage({
     }
 });
   
-const uploadPDF = multer({ storage: storagePDF, limits: { fileSize: 25000000 } });
+const uploadPDF = multer({ storage: storagePDF, limits: { fileSize: 3000000 } });
 
 export default uploadPDF;

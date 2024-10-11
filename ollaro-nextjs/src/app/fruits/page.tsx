@@ -4,6 +4,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LoadingBar from 'react-top-loading-bar';
 import { customFetch } from '../utils/customFetcher';
+import { Tooltip } from 'react-tooltip'
+import { delay } from 'lodash';
 
 type Fruit = {
     _id: string;
@@ -12,6 +14,7 @@ type Fruit = {
 };
 
 export default function ItemList() {
+
     const [items, setItems] = useState<Fruit[]>([]);
     const [newItem, setNewItem] = useState('');
     const [isEditing, setIsEditing] = useState<number | null>(null); // Track the index of the item being edited
@@ -79,6 +82,13 @@ export default function ItemList() {
         }
     };
 
+    /**
+     * This function can be used to handle file input in applications where multiple items can 
+     * have associated files (e.g., uploading images for different products in an inventory system).
+     * Each item can be uniquely identified by itemId, allowing individual files to be selected and managed without overwriting others.
+     * @param e 
+     * @param itemId 
+     */
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, itemId: string) => {
         const files = e.target.files;
         if (files && files.length > 0) {
@@ -86,11 +96,15 @@ export default function ItemList() {
             ...prevSelectedFiles,
             [itemId]: files[0],
           }));
+          delay(() => {
+            console.log('delayed by 2 seconds');
+          }, 3000);
         }
     };
 
     // Handle the custom button click to open file dialog for a specific item
     const handleButtonClick = (itemId: string) => {
+        console.log("handleButtonClick")
         fileInputRefs.current[itemId]?.click();
     };
 
@@ -132,6 +146,7 @@ export default function ItemList() {
                 // Complete the loading bar
                 setProgress(100);
                 loadingBarRef.current?.complete();
+                fetchItems();
             }
         } else {
             console.error('Failed to upload file');
@@ -143,6 +158,7 @@ export default function ItemList() {
         }
     };
     
+
     const handleSearch = async () => {
         try {
           const response = await customFetch(`/api/protected/fruits/search?q=${searchQuery}`);
@@ -171,6 +187,7 @@ export default function ItemList() {
         if (response!.ok) {
             // Remove the item from the local state if the deletion was successful
             setItems((prevItems) => prevItems.filter((_, i) => i !== index));
+            fetchItems();
         } else {
             console.error('Failed to delete item');
         }
@@ -205,6 +222,7 @@ export default function ItemList() {
                     updatedItems[index] = data; // Update the item in the local state with the updated item from the response
                     setItems(updatedItems);
                     setIsEditing(null); // Exit edit mode
+                    fetchItems();
                 } else {
                     console.error('Failed to update item');
                 }
@@ -226,6 +244,10 @@ export default function ItemList() {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
         }
+    };
+
+    const truncateText = (text: string, maxLength: number) => {
+        return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
     };
 
     return (
@@ -305,7 +327,9 @@ export default function ItemList() {
                                     <input
                                         type="file"
                                         accept="image/*" // Accept only image files
-                                        ref={(el) => (fileInputRefs.current[item._id] = el)}
+                                        ref={(el) => {
+                                            fileInputRefs.current[item._id] = el;
+                                        }}
                                         onChange={(e) => handleFileChange(e, item._id)}
                                         style={{ display: 'none' }}
                                         />
@@ -313,8 +337,9 @@ export default function ItemList() {
                                     <button
                                         onClick={() => handleButtonClick(item._id)}
                                         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                                        id="clickable"
                                     >
-                                        {selectedFiles[item._id]?.name ? selectedFiles[item._id]?.name : '...'}
+                                        {selectedFiles[item._id]?.name ? truncateText(selectedFiles[item._id]!.name, 10) : '...'}
                                     </button>
                                     <button
                                         onClick={() => handleUpload(item._id)}
@@ -325,6 +350,9 @@ export default function ItemList() {
                                     >
                                         Upload
                                     </button>
+                                    <Tooltip anchorSelect="#clickable" clickable>
+                                        <button>{selectedFiles[item._id]?.name ? selectedFiles[item._id]!.name : '...'}</button>
+                                    </Tooltip>
                                 </div>
                             </>
                         )}

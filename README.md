@@ -1,3 +1,19 @@
+## OllarooGPT - built with love and passion
+
+It's a lightweight chat assistant integrated with the Ollama Mistral model. Its functionalities include:
+
+* Handling prompts and generating responses.
+* Accepting photos and providing descriptions.
+* Generating songs from text.
+* Implementing Retrieval-Augmented Generation (RAG): Upload a PDF, and the LLM provides responses based on the prompt, with vector data chunked and stored in Pinecone.
+
+Upcoming additions will include integration with 
+
+* OpenAI's DALL·E
+* Reasoning APIs.
+* Document selection where individual pdf is store separately on different collections or index.
+
+<img src="1013.gif" alt="Demo Video" width="600"/>
 
 ## Building docker image
 

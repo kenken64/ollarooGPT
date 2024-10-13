@@ -58,7 +58,7 @@ interface NodeRequestReadable extends Readable {
   }
   
   // Utility function to parse form data using Formidable
-async function parseForm(req: NextRequest): Promise<{ fields: Record<string, any>; files: Record<string, File | File[]> }> {
+  async function parseForm(req: NextRequest): Promise<{ fields: Record<string, any>; files: Record<string, File | File[] | undefined> }> {
     const nodeReq = nextRequestToNodeRequest(req); // Convert the request to NodeRequestReadable
   
     return new Promise((resolve, reject) => {

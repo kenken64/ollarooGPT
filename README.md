@@ -13,6 +13,10 @@ Upcoming additions will include integration with
 * Reasoning APIs.
 * Document selection where individual pdf is store separately on different collections or index.
 
+
+[Watch this YouTube video](https://www.youtube.com/watch?v=h8oMRbgwPSk)
+
+
 <img src="1013.gif" alt="Demo Video" height="100%" width="100%"/>
 
 ## Building docker image

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import RootLayoutClient from "./RootLayoutClient";
+import { AuthProvider } from '../app/context/AuthContext';
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -23,7 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <RootLayoutClient>{children}</RootLayoutClient>
+          <AuthProvider>
+            <RootLayoutClient>{children}</RootLayoutClient>
+          </AuthProvider>
       </body>
     </html>
   );

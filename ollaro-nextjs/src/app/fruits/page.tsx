@@ -257,14 +257,14 @@ export default function ItemList() {
         <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
             <LoadingBar color="#f11946" ref={loadingBarRef} />
             <ToastContainer />
-            <h1 className="text-2xl font-bold text-center mb-6">Fruit List</h1>
+            <h1 className="text-2xl font-bold text-center mb-6 text-black">Fruit List</h1>
             <div className="mt-6 flex">
                 <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search for a fruit"
-                    className="border border-gray-300 rounded-lg px-4 py-2 flex-grow mr-2"
+                    className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 flex-grow mr-2 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 <button
                     onClick={handleSearch}
@@ -290,7 +290,7 @@ export default function ItemList() {
                                     type="text"
                                     value={editValue}
                                     onChange={(e) => setEditValue(e.target.value)}
-                                    className="border border-gray-300 rounded-lg px-3 py-1 w-full mr-2"
+                                    className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 flex-grow mr-2 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                                 />
                                 <button
                                     onClick={() => saveEdit(index, item._id)}
@@ -390,7 +390,7 @@ export default function ItemList() {
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
                     placeholder="Add a new item"
-                    className="border border-gray-300 rounded-lg px-4 py-2 flex-grow mr-2"
+                    className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 flex-grow mr-2 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 <button
                     onClick={addItem}

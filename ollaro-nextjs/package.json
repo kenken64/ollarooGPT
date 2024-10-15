@@ -39,6 +39,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/formidable": "^3.4.5",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/lodash": "^4.17.10",
     "@types/mixpanel-browser": "^2.50.0",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^20",

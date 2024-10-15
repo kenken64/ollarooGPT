@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from "../../context/AuthContext"; // Ensure correct path
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
+  const { login } = useAuth();
 
   useEffect(() => {
     // Redirect user to the homepage if they're already authenticated
@@ -50,6 +52,7 @@ export default function LoginPage() {
         } else {
             setToken(data.token);
             localStorage.setItem('authToken', data.token);
+            login();
             router.push('/');
         }
       } catch (error) {

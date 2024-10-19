@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from "../../context/AuthContext"; // Ensure correct path
+import './PasswordInput.css';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -52,6 +53,7 @@ export default function LoginPage() {
         } else {
             setToken(data.token);
             localStorage.setItem('authToken', data.token);
+            localStorage.setItem('email', email);
             login();
             router.push('/');
         }
@@ -70,14 +72,14 @@ export default function LoginPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 w-full mb-2"
+          className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full mb-2 bg-white dark:bg-gray-800 text-black dark:text-white"
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 w-full mt-4 mb-2"
+          className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full mb-2 bg-white dark:bg-gray-800 text-black dark:text-white"
         />
         <button
           onClick={handleLogin}

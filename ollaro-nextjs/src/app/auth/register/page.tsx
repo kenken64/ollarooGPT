@@ -1,18 +1,26 @@
 'use client';
 
 import { useState } from 'react';
+import './PasswordInput.css';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Regular expressions for email and password validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   const validateInputs = () => {
+    setSuccessMessage('');
     if (!email) {
       setError('Email is required');
       return false;
@@ -27,6 +35,14 @@ export default function RegisterPage() {
     } else if (!passwordRegex.test(password)) {
       setError('Password must be at least 8 characters long and include letters, numbers, and a special character');
       return false;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return false;
+    } else {
+      setError(""); // Clear error if passwords match
+      // Proceed with form submission
     }
 
     setError(null);
@@ -67,14 +83,27 @@ export default function RegisterPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 w-full mb-2"
+          className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full mb-2 bg-white dark:bg-gray-800 text-black dark:text-white"
         />
+        <div className="password-wrapper">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="password-input border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full mb-2 bg-white dark:bg-gray-800 text-black dark:text-white"
+          />
+          <button type="button" onClick={togglePasswordVisibility} className="password-toggle-btn">
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
+        
         <input
           type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 w-full mt-4 mb-2"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 w-full mb-2 bg-white dark:bg-gray-800 text-black dark:text-white"
         />
         <button
           onClick={handleRegister}

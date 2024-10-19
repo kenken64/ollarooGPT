@@ -29,7 +29,7 @@ export default function RootLayoutClient({ children }: { children: ReactNode }) 
               {/* <a href="/aichat" className="mr-4">Ai Chat</a> */}
               <a href="/fruits" className="mr-4">Fruits</a>
               <a href="/services" className="mr-4">Search Services</a>
-              <a href="/list-companies" className="mr-4">List Companies</a>
+              <a href="/companies" className="mr-4">List Companies</a>
               <a href="/edit-service" className="mr-4">Edit My Service</a>
               <button onClick={handleLogout} className="mr-4 bg-transparent text-white">
                 Logout

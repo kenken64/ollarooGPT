@@ -148,8 +148,8 @@ interface NodeRequestReadable extends Readable {
     }
   }
   
-export const config = {
-    api: {
-        bodyParser: false, // Disable built-in body parser to handle file uploads with formidable
-    },
-};
+// export const config = {
+//     api: {
+//         bodyParser: false, // Disable built-in body parser to handle file uploads with formidable
+//     },
+// };

@@ -10,9 +10,10 @@ export async function GET(req: NextRequest) {
       // Extract the search query from the request
       const searchParams = new URL(req.url).searchParams;
       const query = searchParams.get('q') || '';
-  
+      const headers = req.headers;
+      const userEmail = headers.get('X-usermail');
       // Find fruits whose name matches the search query, case insensitive
-      const fruits = await Fruit.find({ name: { $regex: query, $options: 'i' } });
+      const fruits = await Fruit.find({ name: { $regex: query, $options: 'i' }, email: userEmail });
   
       return NextResponse.json({ success: true, data: fruits });
     } catch (error) {

@@ -1,5 +1,5 @@
 declare global {
-    var mongoose: {
+    let mongoose: {
       Types: any;
       conn: any | null;
       promise: Promise<any> | null;

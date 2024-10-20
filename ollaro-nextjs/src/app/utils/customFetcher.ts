@@ -4,6 +4,7 @@ export const customFetch = async (url: string,
     
     // Get the token from localStorage
     const token = localStorage.getItem('authToken');
+    const userEmail = localStorage.getItem('email');
     if(token === null){
         // Create a 401-like response manually
         return new Response(null, {
@@ -15,6 +16,10 @@ export const customFetch = async (url: string,
     const headers = new Headers(options.headers || {});
     if (token) {
       headers.append('Authorization', `Bearer ${token}`);
+    }
+
+    if (userEmail) {
+      headers.append('X-usermail', `${userEmail}`);
     }
 
     // Set the updated headers

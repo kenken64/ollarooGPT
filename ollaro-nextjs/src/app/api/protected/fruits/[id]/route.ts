@@ -14,11 +14,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ success: false, message: 'Invalid ID format' }, { status: 400 });
     }
     await dbConnect();
-    
+    const headers = req.headers;
+    const userEmail = headers.get('X-usermail');
     const existingObjectId = new mongoose.Types.ObjectId(id);
     const body = await req.json();
     const fruit = await Fruit.findById(existingObjectId);
-    const updatedFruit = await Fruit.findByIdAndUpdate(existingObjectId, { name: body.name, url: body.url }, 
+    const updatedFruit = await Fruit.findByIdAndUpdate(existingObjectId, { name: body.name, url: body.url, email: userEmail }, 
             { new: false, runValidators: true });
 
     if (!updatedFruit) {

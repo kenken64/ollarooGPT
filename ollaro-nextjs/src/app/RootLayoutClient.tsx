@@ -2,11 +2,38 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../app/context/AuthContext';
+import { customFetch } from '../app/utils/customFetcher';
 
 export default function RootLayoutClient({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { isAuthenticated, logout } = useAuth();
-  
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const email = localStorage.getItem('email');
+        if (email) {
+          const response = await customFetch(`/api/protected/users?email=${email}`, {
+            method: 'GET',
+          });
+          const data = await response.json();
+          if (data.success && data.data.length > 0) {
+            console.log(data.data[0].role)
+            setUserRole(data.data[0].role);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchUser();
+    }
+  }, [isAuthenticated]);
+
   // Handle logout and dispatch a custom event
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
@@ -29,7 +56,9 @@ export default function RootLayoutClient({ children }: { children: ReactNode }) 
               {/* <a href="/aichat" className="mr-4">Ai Chat</a> */}
               <a href="/fruits" className="mr-4">Fruits</a>
               <a href="/services" className="mr-4">Search Services</a>
-              <a href="/companies" className="mr-4">List Companies</a>
+              {userRole === 'admin' && (
+                <a href="/companies" className="mr-4">List Companies</a>
+              )}
               <a href="/edit-service" className="mr-4">Edit My Service</a>
               <button onClick={handleLogout} className="mr-4 bg-transparent text-white">
                 Logout

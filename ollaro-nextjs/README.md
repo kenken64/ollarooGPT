@@ -1,3 +1,4 @@
+Something
 In React, props (short for properties) are a way to pass data from one component to another. They are used to send information from a parent component to a child component, allowing the child to render dynamic content based on the data received.
 
 Props are essentially read-only values, meaning they are immutable and cannot be modified by the child component that receives them. They make React components more reusable by allowing dynamic values to be passed in, enabling different rendering behaviors depending on what data is passed.

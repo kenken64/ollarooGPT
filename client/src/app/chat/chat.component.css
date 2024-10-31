@@ -264,3 +264,14 @@ li {
   overflow-wrap: break-word;
   white-space: normal;
 }
+
+.left-aligned-image {
+  margin-left: -25px; /* Or use any of the other approaches explained */
+}
+
+.thinking-indicator {
+  font-style: italic;
+  color: gray;
+  margin-left: 30px;
+  
+}

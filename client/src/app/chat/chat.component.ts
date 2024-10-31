@@ -42,7 +42,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   user: SessionUser | undefined = undefined
   userEmail?: string = "";
   userName?: string = "";
-  chatOwnerUsername: string = "Ollaroo";
+  chatOwnerUsername: string = "OllarooGPT";
   promptItemLists$:any;
   isMobileView?: boolean;
   private _bottomSheet = inject(MatBottomSheet);
@@ -52,7 +52,11 @@ export class ChatComponent implements OnInit, OnDestroy{
   totalPages = 0;
   lastPageRecords = 0;
   messageNow: Date = new Date();
-  
+  baseImageUrl: string = 'http://127.0.0.1:5000/gpu_metrics_chart'; // replace with your external image URL
+  imageUrl: string = '';
+  private intervalId: any;
+  isThinking: boolean = false;
+
   @ViewChild('userMessages')
   private inputMessageRef?: ElementRef;
 
@@ -204,7 +208,19 @@ export class ChatComponent implements OnInit, OnDestroy{
     if(!Corbado.isAuthenticated){
       this.router.navigate([''])
     }
+
+    this.refreshImage();
+
+    // Set interval to refresh the image every 2 seconds
+    this.intervalId = setInterval(() => {
+      this.refreshImage();
+    }, 2000);
   } 
+
+  refreshImage() {
+    // Update imageUrl with a unique parameter to force refresh
+    this.imageUrl = `${this.baseImageUrl}?t=${new Date().getTime()}`;
+  }
 
   loadPromptItems(){
     this.promptItemLists$ = liveQuery(() => db.promptItems
@@ -296,17 +312,24 @@ export class ChatComponent implements OnInit, OnDestroy{
                 timestamp: new Date(), type:'msg'});
       this.addPromptMessagetoDexie(text);
       this.messageSent = true;
-      this.ollamaService.chatwithOllama(text).then(async (response) => {
-        this.responseMessage = await markdownToHtml(response.content);
-        this.messages.push({text: this.responseMessage, 
-            sender: this.chatOwnerUsername, 
-            timestamp: new Date(), 
-            type:'msg',
-            elapsed: `Total token: ${response.eval_count} 
-                - Eval duration: ${response.eval_duration_seconds} sec - Total eval duration: ${response.total_duration_seconds} sec`,
-            });
-        this.messageSent = false;
-      });
+      // Simulate bot "thinking"
+      this.isThinking = true;
+      // Simulate a delay to represent the bot processing the reply
+      setTimeout(() => {
+        this.ollamaService.chatwithOllama(text).then(async (response) => {
+          this.responseMessage = await markdownToHtml(response.content);
+          this.messages.push({text: this.responseMessage, 
+              sender: this.chatOwnerUsername, 
+              timestamp: new Date(), 
+              type:'msg',
+              elapsed: `Total token: ${response.eval_count} 
+                  - Eval duration: ${response.eval_duration_seconds} sec - Total eval duration: ${response.total_duration_seconds} sec`,
+              });
+          this.messageSent = false;
+          this.isThinking = false;
+        });
+      }, 2000);
+      
 
       this.loadPromptItems();
       this.loadTotalRecords();

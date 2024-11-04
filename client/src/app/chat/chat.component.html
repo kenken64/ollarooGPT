@@ -1,5 +1,5 @@
 <mat-progress-bar *ngIf="messageSent" mode="indeterminate"></mat-progress-bar>
-        
+
 <div class="chat-container">
     <div class="chat-header">
         <div class="circle-image" [matTooltip]="userEmail!"></div>
@@ -39,14 +39,14 @@
         <div *ngIf="!isMobileView" (window:resize)="onResize($event)" class="prompt-box-container">
             <div class="prompt-box">        
                 <ul *ngFor="let promptItem of (promptItemLists$ | async) let i = index;" >
-                    <li *ngIf="i < 6" style="cursor: pointer;" matTooltip="{{ promptItem.prompt }}"><a (click)="populatePromptMsg(promptItem.prompt)">{{promptItem.prompt | slice:0:50}}...</a></li>
+                    <li *ngIf="i < pageSize" style="cursor: pointer;" matTooltip="{{ promptItem.prompt }}"><a (click)="populatePromptMsg(promptItem.prompt)">{{promptItem.prompt | slice:0:50}}...</a></li>
                 </ul>
                 <button mat-button color="primary" (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
                 <button mat-button color="primary" (click)="nextPage()" [disabled]="currentPage === totalPages || (currentPage ==1 && totalPages ==0)">Next</button>
                 <button mat-button color="primary" matTooltip="clear history"  type="button" (click)="clearHistory()">
                     Clear history
                 </button>
-                <img [src]="imageUrl" alt="Auto Refreshing Image" width="230" height="180" class="left-aligned-image"/>
+                <img [src]="imageUrl" alt="Auto Refreshing Image" class="left-aligned-image"/>
             </div>
             <br>
           </div>

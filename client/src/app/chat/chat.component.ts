@@ -46,7 +46,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   promptItemLists$:any;
   isMobileView?: boolean;
   private _bottomSheet = inject(MatBottomSheet);
-  pageSize = 6; // Number of items per page
+  pageSize = 4; // Number of items per page
   currentPage = 1; // Current page number (1-based)
   totalRecords = 0;
   totalPages = 0;
@@ -56,6 +56,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   imageUrl: string = '';
   private intervalId: any;
   isThinking: boolean = false;
+  showFiller = false;
 
   @ViewChild('userMessages')
   private inputMessageRef?: ElementRef;

@@ -163,7 +163,6 @@ export const uploadGenAIPDF =  async (req, res) => {
       console.log("Assigned existing index")
       var index = pc.Index(process.env.PINECONE_INDEX_NAME)
     }
-    //console.log(req.file.path);
     
     //with stream
     pdf(fs.createReadStream(req.file.path))
@@ -201,7 +200,7 @@ export const uploadGenAIPDF =  async (req, res) => {
       if(chunks.length >0){
         for (let idx = 0; idx < chunks.length; idx++) {
             const chunk = chunks[idx];
-            //console.log(chunk.pageContent);
+            
             const vector = {
               id: `${txtPath}_${idx}${Date.now()}`,
               values: embeddingsArrays[idx],
@@ -212,15 +211,24 @@ export const uploadGenAIPDF =  async (req, res) => {
                 txtPath: txtPath,
               },
             };
-            //console.log("pushing...")
             const x =normalizeVector(vector, 5120)
             batches.push(x);
-          }
+        }
           
           try{
-            console.log("upsert!")
+            // Wait for the index to be ready
+            // // Wait until the index is ready
+            let indexName = process.env.PINECONE_INDEX_NAME;
+            let indexDescription = await pc.describeIndex(indexName);
+            while (!indexDescription.status.ready) {
+              console.log('Index not ready. Waiting...');
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              indexDescription = await pc.describeIndex({ indexName });
+            }
+            const index = pc.Index(indexName);
             await index?.upsert(batches);
           }catch(error){
+            console.log("Error upserting vectors to Pinecone!")
             console.log(error)
           }
           // Empty the batch

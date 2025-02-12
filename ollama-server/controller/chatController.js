@@ -51,7 +51,7 @@ export const chatOllama =  async (req, res) => {
         if(msg.length > 4096){
           res.status(500).json({ error: 'Prompt message exceed 4096' });
         }
-        // temp fix or hack to force the host connecting to the host ollama serve
+        // temp fix or hack to force the host connecting to the host ollama API server
         const ollama = new OllamaB({ host: process.env.OLLAMA_BASE_URL })
         const response = await ollama.chat({
             model: process.env.OLLAMA_MODEL, // Default value
@@ -79,7 +79,7 @@ export const chatOllama =  async (req, res) => {
 export const getAllDocuments = async (req, res) => {
   try {
       const docs = await listDocumentsFromDB();
-      res.json(docs); // Respond with the list of users in JSON format
+      res.json(docs); // Respond with the list of docs in JSON format
   } catch (error) {
       console.error('Failed to fetch documents:', error);
       res.status(500).json({ error: 'Failed to fetch documents' });
@@ -90,7 +90,7 @@ export const saveDocument = async (req, res) => {
   try {
       let document = req.body;
       const doc = await createDocumentToDB(document);
-      res.json(doc); // Respond with the list of users in JSON format
+      res.json(doc); 
   } catch (error) {
       console.error('Failed to create document:', error);
       res.status(500).json({ error: 'Failed to create document' });
@@ -143,9 +143,8 @@ export const chatWithPDF =  async (req, res) => {
 
 export const uploadGenAIPDF =  async (req, res) => {
     try{
-      // Handle the uploaded file
+      // Handle the PDF uploaded file and text extraction in chunks
       console.log("uploading pdf ...");
-      //console.log(req.file);
       
       await pc.createIndex({
         name: process.env.PINECONE_INDEX_NAME,
@@ -164,7 +163,7 @@ export const uploadGenAIPDF =  async (req, res) => {
       var index = pc.Index(process.env.PINECONE_INDEX_NAME)
     }
     
-    //with stream
+    // with stream - chunk by the size of 1000
     pdf(fs.createReadStream(req.file.path))
       .then(data /*is a stream*/ => data.pipe(fs.createWriteStream(req.file.path +".jpg")))
       .catch(err => console.error(err))

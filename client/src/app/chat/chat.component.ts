@@ -46,7 +46,7 @@ export class ChatComponent implements OnInit, OnDestroy{
   promptItemLists$:any;
   isMobileView?: boolean;
   private _bottomSheet = inject(MatBottomSheet);
-  pageSize = 4; // Number of items per page
+  pageSize = 5; // Number of items per page
   currentPage = 1; // Current page number (1-based)
   totalRecords = 0;
   totalPages = 0;

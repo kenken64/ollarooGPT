@@ -23,11 +23,11 @@ mat-grid-tile {
 
 .chat-container {
     width: 100%;
-    height: 100%;
-    border: 1px solid white;
+    height: 90%;
+    border: 1px solid white; 
     border-left: none;
     border-right: none;
-    margin: 0 auto;
+    margin: 0 auto; 
     display: flex;
     flex-direction: column;
 }
@@ -53,27 +53,31 @@ mat-grid-tile {
 }
 
 .scrollable-y {
-    overflow-y: scroll;
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    max-height: 100%;
-    height: 400px; 
-    resize: both; 
-    box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  /* 
+   * If you want the container to grow only up to a certain limit:
+   */
+  max-height: calc(100vh - 120px); 
+  overflow-y: scroll;  /* or scroll, if you always want the scrollbar visible */
+  box-sizing: border-box;
+  resize: both; 
 }
 
 .scrollable-y > * {
-    flex-shrink: 0;
+  /* prevents child elements from shrinking below their content size */
+  flex-shrink: 0;
 }
+
 
 .chat-input {
     position: fixed;
     bottom: 0;
-    width: 100%;
-    height: 10%;
+    width: 98%;
+    height: 70px;
     background: white;
-    
+    padding: 10px;
+    /* box-sizing: border-box; */
 }
 
 #messageInput {
@@ -243,20 +247,22 @@ mat-grid-tile {
 }
 
 .prompt-box-container {
-    display: flex;
-    justify-content: flex-end; /* Align the box to the right */
-    padding: 10px;
-    top: 10%;
-    position: fixed;
-    height: 500px;
-    right: 0;                /* Align to the right */
-    padding: 10px;           /* Add some padding around the box */
-    z-index: 1000;           /* Ensure it's on top of other elements */
+  display: flex;
+  justify-content: flex-end; /* Aligns content to the right */
+  padding: 10px;           /* Adds padding on all sides */
+  top: 10%;                /* Positions the container relative to its parent */
+  width: 100%;             /* Ensures full width coverage */
+  position: fixed;
+  height: 500px;
+  right: 0;               /* Aligns to the right side of the screen */
+  transform-origin: top;   /* Ensures consistent padding alignment */
 }
 
 .prompt-box {
-    padding: 20px;             /* Padding inside the box */
-    width: 200px;       /* Fixed width (you can adjust) */             
+  padding: 20px;          /* Adds padding inside the box */
+  width: 200px;           /* Defines the width of the box */
+  justify-content: center; /* Centers the content horizontally */
+  align-items: center;    /* Aligns items in the box's row(s) vertically */
 }
 
 li {
@@ -267,8 +273,8 @@ li {
 
 .left-aligned-image {
   margin-left: -25px; /* Or use any of the other approaches explained */
-  width: 230px;
-  height: 130px;
+  width: 200px;
+  height: 110px;
   transition: opacity 0.3s ease; 
 }
 

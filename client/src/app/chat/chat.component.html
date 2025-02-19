@@ -24,14 +24,16 @@
         <div  class="chat-messages" *ngFor="let message of messages">
             
             <span>{{ message.sender }} - {{messageNow | date:'medium'}} - {{message.elapsed}}</span>
-                <div *ngIf="message.type==='msg'" class="ollama-wrap" matTooltip="{{ message.text }}" [innerHtml]=message.text></div>
-                <br>
-                <img *ngIf="message.type==='img'" [src]="message.text" (click)="openImage(message.text)" width="200" height="200">
-                <br>
-                <a *ngIf="message.type==='pdf'" [href]="pdfUrl" >"{{ message.text }}"</a>
-                <br>
+                <div *ngIf="message.type==='msg'" class="ollama-wrap" matTooltip="{{ message.text }}" [innerHtml]=message.text><br><br></div>
+                <div *ngIf="message.type==='img'"><img [src]="message.text" (click)="openImage(message.text)" width="200" height="200"><br><br></div>
+                <div *ngIf="message.type==='pdf'">
+                    <a [href]="pdfUrl" >"{{ message.text }}"</a><br><br>
+                </div>
                 <div *ngIf="message.type==='audio'">Here is your song title <b>{{message.title!}}</b>. 'Click Play' to enjoy. Here is the <a style="cursor: pointer;" (click)="openLyricsDialog(message.lyrics)"><b>lyrics</b></a></div>
-                <img *ngIf="message.type==='audio'" [src]="message.image_url!" (click)="openImage(message.image_url!)" width="50" height="50"><audio *ngIf="message.type==='audio'" controls src="{{ message.text }}"></audio>
+                <div *ngIf="message.type==='audio'">
+                    <img [src]="message.image_url!" (click)="openImage(message.image_url!)" width="50" height="50"><audio *ngIf="message.type==='audio'" controls src="{{ message.text }}"></audio>
+                    <br><br> 
+                </div>
         </div>
         <div *ngIf="isThinking" class="thinking-indicator">
             🤖 Thinking .... Typing... 🍌
@@ -49,9 +51,8 @@
                 <img [src]="imageUrl" alt="Auto Refreshing Image" class="left-aligned-image"/>
             </div>
             <br>
-          </div>
-        <div >
-    
+        </div>
+    </div>
     <div class="chat-input">
         <form [formGroup]="messageForm" #formDirective="ngForm" id="messageForm">
             <mat-form-field class="example-full-width" appearance="fill">
@@ -68,5 +69,4 @@
             </mat-form-field>
         </form>
     </div>
-
 </div>

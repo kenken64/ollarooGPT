@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from transformers import pipeline as hf_transformer_pipeline
 from pydantic import BaseModel, Field
 import soundfile as sf # For saving audio
+from contextlib import asynccontextmanager
 
 # --------------------------------------------------------------------------
 # Logging Configuration
@@ -78,6 +79,15 @@ ADJECTIVES = ["Electric", "Cosmic", "Lost", "Forgotten", "Midnight", "Starlight"
 NOUNS_THEME = ["Journey", "Echoes", "Dreams", "Horizons", "Memories", "Secrets", "Odyssey", "Rhapsody", "Serenade", "Lullaby", "Symphony", "Pulse", "Rhythm", "Waves", "Sparks", "Nebula", "Galaxy", "Dimension", "Paradigm", "Chronicles", "Tales"]
 NOUNS_ABSTRACT = ["Heartbeat", "Soul", "Mind", "Vision", "Reflection", "Illusion", "Destiny", "Mirage", "Vortex", "Frequency", "Signal", "Code", "Glitch", "Algorithm"]
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup code
+    print("App is starting")
+    yield
+    # Shutdown code
+    print("App is shutting down")
+
 # --------------------------------------------------------------------------
 # FastAPI Application Initialization
 # --------------------------------------------------------------------------
@@ -87,7 +97,8 @@ app = FastAPI(
     version="1.3.1", # Incremented version for the fix
     docs_url="/api/docs",
     redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json"
+    openapi_url="/api/openapi.json",
+    lifespan=lifespan
 )
 
 cors_options = {

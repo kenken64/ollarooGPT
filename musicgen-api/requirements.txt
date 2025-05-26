@@ -1,0 +1,22 @@
+# requirements.txt
+
+# Web framework
+fastapi==0.103.1
+uvicorn==0.23.2
+pydantic==2.4.2
+
+# Audio processing
+soundfile==0.12.1
+librosa==0.10.1
+
+# Machine learning
+torch==2.7.0
+transformers==4.52.3
+
+# Utilities
+numpy==1.26.4
+#uuid==1.30
+python-dotenv==1.0.0
+
+# SSE
+sse-starlette=2.3.5
